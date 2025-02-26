@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#define MAX_WORD 100 /*tamanho máximo de uma palavra*/
+#define MAX_WORD 100 /*tamanho máximo de uma palavra; ajustável*/
 
 void print_help(){
     printf("-h      mostra a ajuda para o utilizador e termina\n");
@@ -41,17 +41,16 @@ int main(int argc, char *argv[]){
         return 1;
     }
 
-    char word[MAX_WORD];  /*buffer temporário para armazenar as palavras*/
+    char word[MAX_WORD]; /*buffer temporário para armazenar as palavras*/
     int counter = 0;
 
-    // Ler palavras do ficheiro respeitando os delimitadores (espaço, tab, '\n', '/')
     while(fscanf(file, "%s", word) == 1){  
         /*parar de ler a palavra ao encontrar espaço, tab, mudança de linha, ou o caracter '/'*/
         if(strchr(word, (' ' || '\t' || '\n' || '/' )) != NULL){
             continue;
         }
 
-        // Armazenar palavra na lista de palavras
+        /*guarda as palavras no dicionário; strdup aloca memória suficiente para uma cópia da string, e retona um pointer para a mesma*/
         dicionario[counter] = strdup(word);
         if(dicionario[counter] == NULL){
             printf("Erro ao alocar memória para uma palavra.\n");
