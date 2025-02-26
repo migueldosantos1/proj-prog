@@ -8,6 +8,11 @@ int compare(const void *arg1, const void *arg2){
     return strcasecmp(*(const char **)arg1, *(const char **)arg2);
 }
 
+int binary_search(char *word, char **dictionary, int size){
+    char *key = word;
+    return(bsearch(&key, dictionary, size, sizeof(char *), compare) != NULL);
+}
+
 void print_help(){
     printf("-h              mostra a ajuda para o utilizador e termina\n");
     printf("-i filename     nome do ficheiro de entrada, em alternativa a stdin\n");
@@ -20,28 +25,49 @@ void print_help(){
 
 int main(int argc, char *argv[]){
 
-    char *filename = NULL;
+    char *dictionary_filename = NULL;
+    char *input_filename = NULL;
+    char *output_filename = NULL;
+    FILE *input_file = stdin; /*por padrão, toma o nosso input como texto para avaliar*/
+    FILE *output_file = stdout; /*stdout, caso padrão*/
 
     for(int i = 1; i < argc; i++){
         if(strcmp(argv[i], "-h") == 0){
             print_help();
         }
         if(strcmp(argv[i], "-d") == 0){
-            if((i + 1) < argc){ /*o argumento "-d" exige um argumento com o nome do dicionário posteriormente*/
-                filename = argv[i + 1];
-            }
-            /*
-            else{
-                printf("Erro: -d requer um nome de ficheiro.\n");
-                return 1;
-            }
-            */
+            /*o argumento "-d" exige um argumento com o nome do dicionário posteriormente*/
+            dictionary_filename = argv[i + 1];
+        }
+        if(strcmp(argv[i], "-i") == 0){
+            input_filename = argv[i + 1];
+        }
+        if(strcmp(argv[i], "-o") == 0){
+            output_filename = argv[i + 1];
         }
     }
 
-    if(filename == NULL){
+    if(dictionary_filename == NULL){
         printf("Nenhum dicionário introduzido.\n");
         return 1;
+    }
+
+    /*caso o input file seja atribuído, abre o ficheiro fornecido*/
+    if(input_filename != NULL){
+        input_file = fopen(input_filename, "r");
+        if(input_file == NULL){
+            printf("Erro ao abrir o ficheiro de input.\n");
+            return 1;
+        }
+    }
+
+    /*caso o output file seja atribuído, abre o ficheiro fornecido*/
+    if(output_filename != NULL){
+        output_file = fopen(output_filename, "r");
+        if(output_file == NULL){
+            printf("Erro ao abrir o ficheiro de input.\n");
+            return 1;
+        }
     }
     
     FILE *file = fopen(argv[2], "r");
@@ -80,21 +106,23 @@ int main(int argc, char *argv[]){
 
         counter++;
     }
-    /*
-    for(int i = 0; i < 10; i++){
-        printf("%s\n", dictionary[i]);
-    }
-    */
 
+    /*uso do quick sort para ordenar o dicionário de input*/
     qsort(dictionary, counter, sizeof(char *), compare);
 
-    /*
-    for(int i = 0; i < 100; i++){
-        printf("%s\n", dictionary[i]);
+    while(fscanf(input_file, "%s", word) == 1){
+        if(!(binary_search(word, dictionary, counter))){
+            printf("Erro na palavra: \"%s\"\n", word);
+        }
     }
-    */
 
-    
+    /*se "-i" e "-o" não forem emitidos, fecha os ficheiros fornecidos*/
+    if(input_file != stdin){
+        fclose(input_file);
+    }
+    if(output_file != stdout){
+        fclose(output_file);
+    }
 
     fclose(file);
 
