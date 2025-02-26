@@ -15,13 +15,28 @@ void print_help(){
 
 int main(int argc, char *argv[]){
 
+    char *filename = NULL;
+
     for(int i = 1; i < argc; i++){
         if(strcmp(argv[i], "-h") == 0){
             print_help();
         }
         if(strcmp(argv[i], "-d") == 0){
-
+            if((i + 1) < argc){ /*o argumento "-d" exige um argumento com o nome do dicionário posteriormente*/
+                filename = argv[i + 1];
+            }
+            /*
+            else{
+                printf("Erro: -d requer um nome de ficheiro.\n");
+                return 1;
+            }
+            */
         }
+    }
+
+    if(filename == NULL){
+        printf("Nenhum dicionário introduzido.\n");
+        return 1;
     }
     
     FILE *file = fopen(argv[2], "r");
@@ -34,9 +49,9 @@ int main(int argc, char *argv[]){
     long size = ftell(file);
     rewind(file);
 
-    char **dicionario = (char **)malloc(size * sizeof(char *));
-    if(dicionario == NULL){
-        printf("Erro ao alocar memória do dicionário.\n");
+    char **dictionary = (char **)malloc(size * sizeof(char *));
+    if(dictionary == NULL){
+        printf("Erro ao alocar memória para o dicionário.\n");
         fclose(file);
         return 1;
     }
@@ -51,9 +66,9 @@ int main(int argc, char *argv[]){
         }
 
         /*guarda as palavras no dicionário; strdup aloca memória suficiente para uma cópia da string, e retona um pointer para a mesma*/
-        dicionario[counter] = strdup(word);
-        if(dicionario[counter] == NULL){
-            printf("Erro ao alocar memória para uma palavra.\n");
+        dictionary[counter] = strdup(word);
+        if(dictionary[counter] == NULL){
+            printf("Erro ao alocar memória para a palavra.\n");
             fclose(file);
             return 1;
         }
@@ -64,10 +79,10 @@ int main(int argc, char *argv[]){
     fclose(file);
 
     /*free da memória alocada*/
-    for (int i = 0; i < counter; i++) {
-        free(dicionario[i]);
+    for(int i = 0; i < counter; i++){
+        free(dictionary[i]);
     }
-    free(dicionario);
+    free(dictionary);
 
     return 0;
 }
