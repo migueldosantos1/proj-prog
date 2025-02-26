@@ -13,6 +13,22 @@ int binary_search(char *word, char **dictionary, int size){
     return(bsearch(&key, dictionary, size, sizeof(char *), compare) != NULL);
 }
 
+void clean_word(char *word){
+    char temp[100]; /*criação de uma string temporária*/
+    int j = 0; /*índice para copiar caracteres*/
+
+    /*analisa os caracteres de cada palavra um a um*/
+    for(int i = 0; word[i] != '\0'; i++){
+        if((word[i] >= 'A' && word[i] <= 'Z') || (word[i] >= 'a' && word[i] <= 'z')){
+            temp[j++] = word[i];
+        }
+    }
+    temp[j] = '\0'; /*adiciona o fim da string*/
+
+    /*copiar a string temporária de volta para word*/
+    strcpy(word, temp);
+}
+
 void print_help(){
     printf("-h              mostra a ajuda para o utilizador e termina\n");
     printf("-i filename     nome do ficheiro de entrada, em alternativa a stdin\n");
@@ -111,6 +127,7 @@ int main(int argc, char *argv[]){
     qsort(dictionary, counter, sizeof(char *), compare);
 
     while(fscanf(input_file, "%s", word) == 1){
+        clean_word(word);
         if(!(binary_search(word, dictionary, counter))){
             printf("Erro na palavra: \"%s\"\n", word);
         }
