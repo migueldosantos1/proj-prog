@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #define MAX_WORD 100 /*tamanho máximo de uma palavra; ajustável*/
+#define MAX_LINE 100
 
 /*função que compara dois argumentos sem ter em conta maiúsculas*/
 int compare(const void *arg1, const void *arg2){
@@ -11,6 +12,13 @@ int compare(const void *arg1, const void *arg2){
 int binary_search(char *word, char **dictionary, int size){
     char *key = word;
     return(bsearch(&key, dictionary, size, sizeof(char *), compare) != NULL);
+}
+
+void remove_newline(char *line){
+    size_t len = strlen(line);
+    if(len > 0 && line[len - 1] == '\n'){
+        line[len - 1] = '\0';
+    }
 }
 
 void clean_word(char *word){
@@ -50,6 +58,7 @@ int main(int argc, char *argv[]){
     for(int i = 1; i < argc; i++){
         if(strcmp(argv[i], "-h") == 0){
             print_help();
+            return 0;
         }
         if(strcmp(argv[i], "-d") == 0){
             /*o argumento "-d" exige um argumento com o nome do dicionário posteriormente*/
@@ -126,11 +135,35 @@ int main(int argc, char *argv[]){
     /*uso do quick sort para ordenar o dicionário de input*/
     qsort(dictionary, counter, sizeof(char *), compare);
 
-    while(fscanf(input_file, "%s", word) == 1){
-        clean_word(word);
-        if(!(binary_search(word, dictionary, counter))){
-            printf("Erro na palavra: \"%s\"\n", word);
+    char line[MAX_LINE];
+    int line_number = 0;
+
+    while(fgets(line, sizeof(line), input_file)){
+        line_number++;
+        remove_newline(line);
+
+        /*copiar a linha para uma string; porque o strtok substitui o primeiro espaço/tab por \0, acabando por aí a variável line*/
+        char line_copy[MAX_LINE]; 
+        strcpy(line_copy, line);
+
+        int has_error = 0;
+        /*uso da função strtok - string token, que divide a string, neste caso a nossa linha, em palavras separadas a partir do que nós considerarmos como fim de palavra*/
+        char *token = strtok(line, " \t"); /*espaço, tab; definidos como fim de palavra*/
+
+        while(token != NULL){
+            clean_word(token);
+
+            if(!binary_search(token, dictionary, counter)){
+                if(!has_error){
+                    printf("%d: \"%s\"\n", line_number, line_copy);
+                    has_error = 1;
+                }
+                printf("Erro na palavra \"%s\"\n", token);
+            }
+
+            token = strtok(NULL, " \t");
         }
+        //printf("\n");
     }
 
     /*se "-i" e "-o" não forem emitidos, fecha os ficheiros fornecidos*/
