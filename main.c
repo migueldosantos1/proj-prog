@@ -30,6 +30,11 @@ void clean_word(char *word){
         if((word[i] >= 'A' && word[i] <= 'Z') || (word[i] >= 'a' && word[i] <= 'z')){
             temp[j++] = word[i];
         }
+        else if(word[i] == '\'' && i > 0 && word[i+1] != '\0' &&
+            ((word[i-1] >= 'A' && word[i-1] <= 'Z') || (word[i-1] >= 'a' && word[i-1] <= 'z')) &&
+            ((word[i+1] >= 'A' && word[i+1] <= 'Z') || (word[i+1] >= 'a' && word[i+1] <= 'z'))){
+            temp[j++] = word[i];
+        }
     }
     temp[j] = '\0'; /*adiciona o fim da string*/
 
@@ -88,9 +93,9 @@ int main(int argc, char *argv[]){
 
     /*caso o output file seja atribuído, abre o ficheiro fornecido*/
     if(output_filename != NULL){
-        output_file = fopen(output_filename, "r");
+        output_file = fopen(output_filename, "w");
         if(output_file == NULL){
-            printf("Erro ao abrir o ficheiro de input.\n");
+            printf("Erro ao abrir o ficheiro de output.\n");
             return 1;
         }
     }
@@ -117,7 +122,7 @@ int main(int argc, char *argv[]){
 
     while(fscanf(file, "%s", word) == 1){  
         /*parar de ler a palavra ao encontrar espaço, tab, mudança de linha, ou o caracter '/'*/
-        if(strchr(word, (' ' || '\t' || '\n' || '/' )) != NULL){
+        if(strchr(word, (' ' || '\t' || '\n' || '/' || '-')) != NULL){
             continue;
         }
 
@@ -154,16 +159,23 @@ int main(int argc, char *argv[]){
             clean_word(token);
 
             if(!binary_search(token, dictionary, counter)){
-                if(!has_error){
-                    printf("%d: \"%s\"\n", line_number, line_copy);
-                    has_error = 1;
+                if(argv[5] != NULL){
+                    if(!has_error){
+                        fprintf(output_file, "%d: %s\n", line_number, line_copy);
+                        has_error = 1;
+                    }
+                    fprintf(output_file, "Erro na palavra \"%s\"\n", token);
                 }
-                printf("Erro na palavra \"%s\"\n", token);
+                else{
+                    if(!has_error){
+                        printf("%d: %s\n", line_number, line_copy);
+                        has_error = 1;
+                    }
+                    printf("Erro na palavra \"%s\"\n", token);
+                }
             }
-
-            token = strtok(NULL, " \t");
+            token = strtok(NULL, " \t-");
         }
-        //printf("\n");
     }
 
     /*se "-i" e "-o" não forem emitidos, fecha os ficheiros fornecidos*/
