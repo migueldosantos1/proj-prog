@@ -22,14 +22,20 @@ void remove_newline(char *line){
 }
 
 void clean_word(char *word){
-    char temp[100]; /*criação de uma string temporária*/
-    int j = 0; /*índice para copiar caracteres*/
+    char temp[MAX_WORD]; /*criação de uma string temporária*/
+    char *ptchars = "àáéíóúãõâêôçÀÁÉÍÓÚÃÕÂÊÔÇ"; /*string com os caracteres específicos do dicionário português*/
+    int j = 0;
 
-    /*analisa os caracteres de cada palavra um a um*/
     for(int i = 0; word[i] != '\0'; i++){
         if((word[i] >= 'A' && word[i] <= 'Z') || (word[i] >= 'a' && word[i] <= 'z')){
             temp[j++] = word[i];
         }
+        else if(word[i] >= '0' && word[i] <= '9'){ /*permitir números*/
+            temp[j++] = word[i];
+        }
+        else if(strchr(ptchars, word[i]) != NULL){ /*permitir letras acentuadas - para o dicionário português*/
+            temp[j++] = word[i];
+        }        
         else if(word[i] == '\'' && i > 0 && word[i+1] != '\0' &&
             ((word[i-1] >= 'A' && word[i-1] <= 'Z') || (word[i-1] >= 'a' && word[i-1] <= 'z')) &&
             ((word[i+1] >= 'A' && word[i+1] <= 'Z') || (word[i+1] >= 'a' && word[i+1] <= 'z'))){
@@ -153,12 +159,12 @@ int main(int argc, char *argv[]){
 
         int has_error = 0;
         /*uso da função strtok - string token, que divide a string, neste caso a nossa linha, em palavras separadas a partir do que nós considerarmos como fim de palavra*/
-        char *token = strtok(line, " \t"); /*espaço, tab; definidos como fim de palavra*/
+        char *token = strtok(line, " \t-"); /*espaço, tab e hífen; definidos como fim de palavra*/
 
         while(token != NULL){
             clean_word(token);
 
-            if(!binary_search(token, dictionary, counter)){
+            if(!(strspn(token, "0123456789") == strlen(token)) && !binary_search(token, dictionary, counter)){
                 if(argv[5] != NULL){
                     if(!has_error){
                         fprintf(output_file, "%d: %s\n", line_number, line_copy);

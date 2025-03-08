@@ -4,8 +4,6 @@ Erro na palavra "centred"
 Erro na palavra "Trepoff"
 34: of the singular tragedy of the Atkinson brothers at Trincomalee, and
 Erro na palavra "Trincomalee"
-40: One night-it was on the twentieth of March, 1888-I was returning from a
-Erro na palavra ""
 58: spirit case and a gasogene in the corner. Then he stood before the fire
 Erro na palavra "gasogene"
 86: of your left shoe, just where the firelight strikes it, the leather is
@@ -18,8 +16,6 @@ Erro na palavra "iodoform"
 Erro na palavra "theorise"
 151: endeavouring to imitate my companion's processes. "Such paper could not
 Erro na palavra "endeavouring"
-155: "Peculiar-that is the very word," said Holmes. "It is not an English
-Erro na palavra "Peculiarthat"
 165: "Not at all. The 'G' with the small 't' stands for 'Gesellschaft,'
 Erro na palavra "Gesellschaft"
 167: our 'Co.' 'P,' of course, stands for 'Papier.' Now for the 'Eg.' Let us
@@ -29,16 +25,10 @@ Erro na palavra "Eg"
 Erro na palavra "Eglow"
 Erro na palavra "Eglonitz"
 Erro na palavra "Egria"
-170: German-speaking country-in Bohemia, not far from Carlsbad. 'Remarkable
-Erro na palavra "Germanspeaking"
-172: glass-factories and paper-mills.' Ha, ha, my boy, what do you make of
-Erro na palavra "glassfactories"
 181: that. It is the German who is so uncourteous to his verbs. It only
 Erro na palavra "uncourteous"
 192: the window. "A nice little brougham and a pair of beauties. A hundred
 Erro na palavra "brougham"
-201: "But your client-"
-Erro na palavra ""
 217: thrown over his shoulders was lined with flame-coloured silk and
 Erro na palavra "coloured"
 223: part of his face, extending down past the cheekbones, a black vizard
@@ -60,13 +50,8 @@ Erro na palavra "von"
 Erro na palavra "Ormstein"
 Erro na palavra "Cassel"
 Erro na palavra "Felstein"
-313: "Let me see!" said Holmes. "Hum! Born in New Jersey in the year 1858.
-Erro na palavra ""
 314: Contralto-hum! La Scala, hum! Prima donna Imperial Opera of Warsaw-yes!
-Erro na palavra "Contraltohum"
 Erro na palavra "Prima"
-320: "Precisely so. But how-"
-Erro na palavra ""
 393: "To Clotilde Lothman von Saxe-Meningen, second daughter of the King of
 Erro na palavra "Clotilde"
 Erro na palavra "Lothman"
