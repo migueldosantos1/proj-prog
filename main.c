@@ -1,8 +1,4 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#define MAX_WORD 100 /*tamanho máximo de uma palavra; ajustável*/
-#define MAX_LINE 100
+#include "main.h"
 
 /*função que compara dois argumentos sem ter em conta maiúsculas*/
 int compare(const void *arg1, const void *arg2){
