@@ -127,7 +127,7 @@ int main(int argc, char *argv[]){
             continue;
         }
 
-        /*guarda as palavras no dicionário; strdup aloca memória suficiente para uma cópia da string, e retona um pointer para a mesma*/
+        /*guarda as palavras no dicionário; strdup aloca memória suficiente para uma cópia da string, e retorna um pointer para a mesma*/
         dictionary[counter] = strdup(word);
         if(dictionary[counter] == NULL){
             printf("Erro ao alocar memória para a palavra.\n");
