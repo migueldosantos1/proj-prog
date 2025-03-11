@@ -56,7 +56,7 @@ void print_help(){
 
 int main(int argc, char *argv[]){
 
-    char *dictionary_filename = NULL;
+    char *dictionary_filename = "words";
     char *input_filename = NULL;
     char *output_filename = NULL;
     FILE *input_file = stdin; /*por padrão, toma o nosso input como texto para avaliar*/
@@ -67,10 +67,9 @@ int main(int argc, char *argv[]){
             print_help();
             return 0;
         }
-        if(strcmp(argv[i], "-d") == 0){
-            /*o argumento "-d" exige um argumento com o nome do dicionário posteriormente*/
+        /*if(strcmp(argv[i], "-d") == 0){
             dictionary_filename = argv[i + 1];
-        }
+        }*/
         if(strcmp(argv[i], "-i") == 0){
             input_filename = argv[i + 1];
         }
@@ -102,7 +101,7 @@ int main(int argc, char *argv[]){
         }
     }
     
-    FILE *file = fopen(argv[2], "r");
+    FILE *file = fopen(dictionary_filename, "r");
     if(file == NULL){
         printf("Erro ao abrir o dicionário.\n");
         return 1;
