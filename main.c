@@ -31,7 +31,7 @@ void clean_word(char *word){
         }
         else if(strchr(ptchars, word[i]) != NULL){ /*permitir letras acentuadas - para o dicionário português*/
             temp[j++] = word[i];
-        }        
+        }
         else if(word[i] == '\'' && i > 0 && word[i+1] != '\0' &&
             ((word[i-1] >= 'A' && word[i-1] <= 'Z') || (word[i-1] >= 'a' && word[i-1] <= 'z')) &&
             ((word[i+1] >= 'A' && word[i+1] <= 'Z') || (word[i+1] >= 'a' && word[i+1] <= 'z'))){
@@ -56,25 +56,48 @@ void print_help(){
 
 int main(int argc, char *argv[]){
 
-    char *dictionary_filename = "words";
+    char *dictionary_filename = NULL;
     char *input_filename = NULL;
     char *output_filename = NULL;
-    FILE *input_file = stdin; /*por padrão, toma o nosso input como texto para avaliar*/
+    FILE *input_file = stdin; /*por padrão, toma o nosso input como stdin*/
     FILE *output_file = stdout; /*stdout, caso padrão*/
+
+    int alt = 0; /*número máximo de alternativas a mostrar para cada palavra errada*/
+    int diffs = 0; /*número máximo de diferenças a considerar nos erros ortográficos*/
+    int mode = 0; /*modo de funcionamento do programa*/
 
     for(int i = 1; i < argc; i++){
         if(strcmp(argv[i], "-h") == 0){
             print_help();
             return 0;
         }
-        /*if(strcmp(argv[i], "-d") == 0){
+        if(strcmp(argv[i], "-d") == 0){
+            /*o argumento "-d" exige um argumento com o nome do dicionário posteriormente*/
             dictionary_filename = argv[i + 1];
-        }*/
+        }
         if(strcmp(argv[i], "-i") == 0){
             input_filename = argv[i + 1];
         }
         if(strcmp(argv[i], "-o") == 0){
             output_filename = argv[i + 1];
+        }
+        if(strcmp(argv[i], "-a") == 0){
+            alt = atoi(argv[i + 1]);
+        }
+        else if(strcmp(argv[i], "-a") == 1){
+            alt = 10;
+        }
+        if(strcmp(argv[i], "-n") == 0){
+            diffs = atoi(argv[i + 1]);
+        }
+        else if(strcmp(argv[i], "-n") == 1){
+            diffs = 2;
+        }
+        if(strcmp(argv[i], "-m") == 0){
+            mode = atoi(argv[i + 1]);
+        }
+        else if(strcmp(argv[i], "-m") == 1){
+            mode = 1;
         }
     }
 
@@ -100,8 +123,8 @@ int main(int argc, char *argv[]){
             return 1;
         }
     }
-    
-    FILE *file = fopen(dictionary_filename, "r");
+
+    FILE *file = fopen(argv[2], "r");
     if(file == NULL){
         printf("Erro ao abrir o dicionário.\n");
         return 1;
