@@ -40,6 +40,46 @@ void mode1(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
     }
 }
 
+void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, char *argv[]){
+    char line[MAX_LINE];
+    int line_number = 0;
+
+    while(fgets(line, sizeof(line), input_file)){
+        line_number++;
+        remove_newline(line);
+
+        /*copiar a linha para uma string; porque o strtok substitui o primeiro espaço/tab por \0, acabando por aí a variável line*/
+        char line_copy[MAX_LINE]; 
+        strcpy(line_copy, line);
+
+        int has_error = 0;
+        /*uso da função strtok - string token, que divide a string, neste caso a nossa linha, em palavras separadas a partir do que nós considerarmos como fim de palavra*/
+        char *token = strtok(line, " \t-"); /*espaço, tab e hífen; definidos como fim de palavra*/
+
+        while(token != NULL){
+            clean_word(token);
+
+            if(!(strspn(token, "0123456789") == strlen(token)) && !binary_search(token, dictionary, counter)){
+                if(argv[5] != NULL){
+                    if(!has_error){
+                        fprintf(output_file, "%d: %s\n", line_number, line_copy);
+                        has_error = 1;
+                    }
+                    fprintf(output_file, "Erro na palavra \"%s\"\n", token);
+                }
+                else{
+                    if(!has_error){
+                        printf("%d: %s\n", line_number, line_copy);
+                        has_error = 1;
+                    }
+                    printf("Erro na palavra \"%s\"\n", token);
+                }
+            }
+            token = strtok(NULL, " \t-");
+        }
+    }
+}
+
 /*função que compara dois argumentos sem ter em conta maiúsculas*/
 int compare(const void *arg1, const void *arg2){
     return strcasecmp(*(const char **)arg1, *(const char **)arg2);
@@ -212,6 +252,9 @@ int main(int argc, char *argv[]){
 
     /*chamada da função --- funcionamento 1, caso mode seja 1 como é óbvio*/
     if(mode == 1){
+        mode1(input_file, output_file, dictionary, counter, argv);
+    }
+    if(mode == 2){
         mode1(input_file, output_file, dictionary, counter, argv);
     }
 
