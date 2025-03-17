@@ -1,6 +1,6 @@
 #include "main.h"
 
-void mode1(FILE *input_file, FILE *output_file, char **dictionary, int counter, char *argv[]){
+void mode1(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[]){
     char line[MAX_LINE];
     int line_number = 0;
 
@@ -20,7 +20,7 @@ void mode1(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
             clean_word(token);
 
             if(!(strspn(token, "0123456789") == strlen(token)) && !binary_search(token, dictionary, counter)){
-                if(argv[5] != NULL){
+                if(output(argc, argv) == 1){
                     if(!has_error){
                         fprintf(output_file, "%d: %s\n", line_number, line_copy);
                         has_error = 1;
@@ -40,7 +40,7 @@ void mode1(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
     }
 }
 
-void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, char *argv[]){
+void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[]){
     char line[MAX_LINE];
     int line_number = 0;
 
@@ -60,7 +60,7 @@ void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
             clean_word(token);
 
             if(!(strspn(token, "0123456789") == strlen(token)) && !binary_search(token, dictionary, counter)){
-                if(argv[5] != NULL){
+                if(output(argc, argv) == 1){
                     if(!has_error){
                         fprintf(output_file, "%d: %s\n", line_number, line_copy);
                         has_error = 1;
@@ -78,6 +78,15 @@ void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
             token = strtok(NULL, " \t-");
         }
     }
+}
+
+bool output(int argc, char *argv[]){
+    for(int i = 1; i < argc; i++){
+        if(strcmp(argv[i], "-o") == 0){
+            return 1;
+        }
+    }
+    return 0;
 }
 
 /*função que compara dois argumentos sem ter em conta maiúsculas*/
@@ -252,10 +261,10 @@ int main(int argc, char *argv[]){
 
     /*chamada da função --- funcionamento 1, caso mode seja 1 como é óbvio*/
     if(mode == 1){
-        mode1(input_file, output_file, dictionary, counter, argv);
+        mode1(input_file, output_file, dictionary, counter, argc, argv);
     }
     if(mode == 2){
-        mode1(input_file, output_file, dictionary, counter, argv);
+        mode2(input_file, output_file, dictionary, counter, argc, argv);
     }
 
     /*se "-i" e "-o" não forem emitidos, fecha os ficheiros fornecidos*/
