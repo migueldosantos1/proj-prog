@@ -209,44 +209,33 @@ int main(int argc, char *argv[]){
     FILE *input_file = stdin; /*por padrão, toma o nosso input como stdin*/
     FILE *output_file = stdout; /*stdout, caso padrão*/
 
-    int alt = 0; /*número máximo de alternativas a mostrar para cada palavra errada*/
-    int diffs = 0; /*número máximo de diferenças a considerar nos erros ortográficos*/
-    int mode = 0; /*modo de funcionamento do programa*/
+    int alt = 10; /*por omissão, o número máximo de alternativas a mostrar é definido a 10*/
+    int diffs = 2; /*por omissão, o número máximo de diferenças a considerar é definido a 2*/
+    int mode = 1; /*por omissão, o modo de funcionamento é definido como 1*/
 
     for(int i = 1; i < argc; i++){
         if(strcmp(argv[i], "-h") == 0){
             print_help();
             return 0;
         }
-        if(strcmp(argv[i], "-d") == 0){
-            /*o argumento "-d" exige um argumento com o nome do dicionário posteriormente*/
-            dictionary_filename = argv[i + 1];
+        /*o argumento "-d" exige um argumento com o nome do dicionário posteriormente*/
+        else if(strcmp(argv[i], "-d") == 0 && i + 1 < argc){
+            dictionary_filename = argv[++i];
         }
-        if(strcmp(argv[i], "-i") == 0){
-            input_filename = argv[i + 1];
+        else if(strcmp(argv[i], "-i") == 0 && i + 1 < argc){
+            input_filename = argv[++i];
         }
-        if(strcmp(argv[i], "-o") == 0){
-            output_filename = argv[i + 1];
+        else if(strcmp(argv[i], "-o") == 0 && i + 1 < argc){
+            output_filename = argv[++i];
         }
-        if(strcmp(argv[i], "-a") == 0){
-            alt = atoi(argv[i + 1]);
+        else if(strcmp(argv[i], "-a") == 0 && i + 1 < argc){
+            alt = atoi(argv[++i]);
         }
-        /*por omissão, o número máximo de alternativas a mostrar é definido a 10*/
-        else if(strcmp(argv[i], "-a") == 1){
-            alt = 10;
+        else if(strcmp(argv[i], "-n") == 0 && i + 1 < argc){
+            diffs = atoi(argv[++i]);
         }
-        if(strcmp(argv[i], "-n") == 0){
-            diffs = atoi(argv[i + 1]);
-        }
-        /*por omissão, o número máximo de diferenças a considerar é definido a 2*/
-        else if(strcmp(argv[i], "-n") == 1){
-            diffs = 2;
-        }
-        if(strcmp(argv[i], "-m") == 0){
-            mode = atoi(argv[i + 1]);
-        }
-        else if(strcmp(argv[i], "-m") == 1){
-            mode = 1;
+        else if(strcmp(argv[i], "-m") == 0 && i + 1 < argc){
+            mode = atoi(argv[++i]);
         }
     }
 
