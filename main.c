@@ -9,6 +9,18 @@ bool output(int argc, char *argv[]){
     return 0;
 }
 
+int compare_suggestions(const void *a, const void *b){
+    suggestion_data *s1 = (suggestion_data *)a;
+    suggestion_data *s2 = (suggestion_data *)b;
+
+    /*comparar pelo número de diferenças primeiro*/
+    if(s1->differences != s2->differences){
+        return s1->differences - s2->differences;
+    }
+    /*se o número de diferenças for o mesmo, começar a ordenar pela ordem do dicionário*/
+    return strcasecmp(s1->word, s2->word);
+}
+
 /*função que compara dois argumentos sem ter em conta maiúsculas*/
 int compare(const void *arg1, const void *arg2){
     return strcasecmp(*(const char **)arg1, *(const char **)arg2);
@@ -68,13 +80,13 @@ int calculate_differences(char *token, char *word){
     int tokenlen = strlen(token);
     int i = 0, j = 0, numberofdiffs = 0;
 
-    while(i < wordlen && j < tokenlen){
+    while(i <= (wordlen - 1) && j <= (tokenlen - 1)){
         if(token[i] != word[j]){
             numberofdiffs++;
-            if(tokenlen > wordlen){
+            if(i == wordlen && tokenlen > wordlen){
                 i++; /*letra a mais no token - aka na palavra errada*/
             }
-            else if(tokenlen < wordlen){
+            else if(j == tokenlen && tokenlen < wordlen){
                 j++; /*igual mas na palavra do dicionário*/
             }
             else{
@@ -94,30 +106,43 @@ int calculate_differences(char *token, char *word){
 }
 
 void suggestions(int counter, int alt, char *token, char **dictionary, int maxdiffs, int argc, char *argv[], FILE *output_file){
-    int found = 0;
+    suggestion_data *list = malloc(counter * sizeof(suggestion_data));
+    if(list == NULL){
+        printf("Erro ao alocar memória para as sugestões.\n");
+        return;
+    }
 
-    for(int distinct = 1; distinct <= maxdiffs && found < alt; distinct++){
-        for(int i = 0; i < counter && found < alt; i++){
-            if(calculate_differences(token, dictionary[i]) == distinct){
-                if(output(argc, argv) == 1){
-                    if(found > 0){
-                        fprintf(output_file, ", ");
-                    }
-                    fprintf(output_file, "%s", dictionary[i]);
-                }
-                else{
-                    if(found > 0){
-                        printf(", ");
-                    }
-                    printf("%s", dictionary[i]);
-                }
-                found++;
-            }
+    int found = 0;
+    for(int i = 0; i < counter; i++){
+        int diffs = calculate_differences(token, dictionary[i]);
+        if(diffs <= maxdiffs){
+            list[found].word = dictionary[i];
+            list[found].differences = diffs;
+            found++;
         }
     }
-    if(found == 0){
-        printf("\n");
+
+    qsort(list, found, sizeof(suggestion_data), compare_suggestions);
+
+    for(int i = 0; i < found && i < alt; i++){
+        if(i > 0){
+            if(output(argc, argv) == 1){
+                fprintf(output_file, ", ");
+            } 
+            else{
+                printf(", ");
+            }
+        }
+        if(output(argc, argv) == 1){
+            fprintf(output_file, "%s", list[i].word);
+        } 
+        else{
+            printf("%s", list[i].word);
+        }
     }
+    printf("\n");
+
+    free(list);
 }
 
 void mode1(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[]){
