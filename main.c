@@ -76,28 +76,35 @@ void print_help(){
 }
 
 int calculate_differences(char *token, char *word){
-    int wordlen = strlen(word);
     int tokenlen = strlen(token);
+    int wordlen = strlen(word);
     int i = 0, j = 0, numberofdiffs = 0;
 
-    while(i <= (wordlen - 1) && j <= (tokenlen - 1)){
-        if(token[i] != word[j]){
-            numberofdiffs++;
-            if(i == wordlen && tokenlen > wordlen){
-                i++; /*letra a mais no token - aka na palavra errada*/
-            }
-            else if(j == tokenlen && tokenlen < wordlen){
-                j++; /*igual mas na palavra do dicionário*/
-            }
-            else{
-                i++;
-                j++;
-            }
-        }
+    while(i < tokenlen && j < wordlen && tolower(token[i]) == tolower(word[j])){
+        i++;
+        j++;
+    }
+    /*se existe um deslocamento inicial (primeiros caracteres diferentes), contabiliza-se um erro*/
+    if(i < tokenlen && j < wordlen){
+        numberofdiffs++;
+        if(tokenlen > wordlen){
+            i++; /*avança no índice do token*/
+        } 
+        else if(wordlen > tokenlen){
+            j++; /*avança no índice da palavra do dicionário*/
+        } 
         else{
             i++;
             j++;
         }
+    }
+    /*continua a comparação normal das palavras, se uma letra tiver sido suprimida no início*/
+    while(i < tokenlen && j < wordlen){
+        if(tolower(token[i]) != tolower(word[j])){
+            numberofdiffs++;
+        }
+        i++;
+        j++;
     }
     /*contar as restantes diferenças quando uma palavra acaba primeira que a outra*/
     numberofdiffs += abs((tokenlen - i) - (wordlen - j));
@@ -140,8 +147,6 @@ void suggestions(int counter, int alt, char *token, char **dictionary, int maxdi
             printf("%s", list[i].word);
         }
     }
-    printf("\n");
-
     free(list);
 }
 
@@ -219,6 +224,7 @@ void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
                     }
                     printf("Erro na palavra \"%s\"\n", token);
                 }
+                /*chamada da função suggestions para começar a procura de sugestões para a palavra errada*/
                 suggestions(counter, alt, token, dictionary, diffs, argc, argv, output_file);
             }
             token = strtok(NULL, " \t-");
