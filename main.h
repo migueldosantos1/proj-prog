@@ -20,10 +20,10 @@ void clean_word(char *word);
 
 void print_help();
 
-void suggestions(int counter, int alt, char *word, char *token, char **dictionary);
+void suggestions(int counter, int alt, char *token, char **dictionary, int maxdiffs, int argc, char *argv[], FILE *output_file);
 
 void mode1(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[]);
 
-void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[], int alt, char *word);
+void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[], int alt, char *word, int diffs);
 
 #endif

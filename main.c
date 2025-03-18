@@ -63,19 +63,60 @@ void print_help(){
     printf("-m nn           o modo de funcionamento do programa deve ser nn\n");
 }
 
-void suggestions(int counter, int alt, char *word, char *token, char **dictionary){
-    int i = 0;
-    int offset = 0;
-    char temp[MAX_WORD];
+int calculate_differences(char *token, char *word){
+    int wordlen = strlen(word);
+    int tokenlen = strlen(token);
+    int i = 0, j = 0, numberofdiffs = 0;
 
-    while(i < alt){
-        for(int j = 0; j < counter; j++){
-            if(token[j] == word[j]){
-                offset = alt;
-                temp[] = token[j] + 'offset';
-                printf("%c", temp);
+    while(i < wordlen && j < tokenlen){
+        if(token[i] != word[j]){
+            numberofdiffs++;
+            if(tokenlen > wordlen){
+                i++; /*letra a mais no token - aka na palavra errada*/
+            }
+            else if(tokenlen < wordlen){
+                j++; /*igual mas na palavra do dicionário*/
+            }
+            else{
+                i++;
+                j++;
             }
         }
+        else{
+            i++;
+            j++;
+        }
+    }
+    /*contar as restantes diferenças quando uma palavra acaba primeira que a outra*/
+    numberofdiffs += abs((tokenlen - i) - (wordlen - j));
+
+    return numberofdiffs;
+}
+
+void suggestions(int counter, int alt, char *token, char **dictionary, int maxdiffs, int argc, char *argv[], FILE *output_file){
+    int found = 0;
+
+    for(int distinct = 1; distinct <= maxdiffs && found < alt; distinct++){
+        for(int i = 0; i < counter && found < alt; i++){
+            if(calculate_differences(token, dictionary[i]) == distinct){
+                if(output(argc, argv) == 1){
+                    if(found > 0){
+                        fprintf(output_file, ", ");
+                    }
+                    fprintf(output_file, "%s", dictionary[i]);
+                }
+                else{
+                    if(found > 0){
+                        printf(", ");
+                    }
+                    printf("%s", dictionary[i]);
+                }
+                found++;
+            }
+        }
+    }
+    if(found == 0){
+        printf("\n");
     }
 }
 
@@ -119,7 +160,7 @@ void mode1(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
     }
 }
 
-void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[], int alt, char *word){
+void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[], int alt, char *word, int diffs){
     char line[MAX_LINE];
     int line_number = 0;
 
@@ -153,7 +194,7 @@ void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
                     }
                     printf("Erro na palavra \"%s\"\n", token);
                 }
-                suggestions(counter, alt, word, token, dictionary);
+                suggestions(counter, alt, token, dictionary, diffs, argc, argv, output_file);
             }
             token = strtok(NULL, " \t-");
         }
@@ -208,10 +249,6 @@ int main(int argc, char *argv[]){
             mode = 1;
         }
     }
-
-    printf("%d\n", alt);
-    printf("%d\n", diffs);
-    printf("%d\n", mode);
 
     if(dictionary_filename == NULL){
         printf("Nenhum dicionário introduzido.\n");
@@ -279,7 +316,7 @@ int main(int argc, char *argv[]){
         mode1(input_file, output_file, dictionary, counter, argc, argv);
     }
     if(mode == 2){
-        mode2(input_file, output_file, dictionary, counter, argc, argv, alt, word);
+        mode2(input_file, output_file, dictionary, counter, argc, argv, alt, word, diffs);
     }
 
     /*se "-i" e "-o" não forem emitidos, fecha os ficheiros fornecidos*/
