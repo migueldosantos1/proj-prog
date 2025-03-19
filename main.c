@@ -75,6 +75,31 @@ void print_help(){
     printf("-m nn           o modo de funcionamento do programa deve ser nn\n");
 }
 
+void split(char *word, char **dictionary, int counter, suggestion_data *list, int *found, int maxdiffs){
+
+    for(int i = 1; i < strlen(word); i++){
+        char left[MAX_WORD], right[MAX_WORD];
+
+        /*strncpy copia os primeiros i caracteres de uma string para a memória de outra string - left neste caso*/
+        strncpy(left, word, i);
+        left[i] = '\0'; /*finaliza a string*/
+        strcpy(right, &word[i]); /*copia o resto que ficou, para a outra parte*/
+
+        if(binary_search(left, dictionary, counter) && binary_search(right, dictionary, counter)){
+            /*combinar as novas strings numa só*/
+            char combined[MAX_WORD * 2];
+            snprintf(combined, sizeof(combined), "%s %s", left, right);
+
+            /*armazena as informações da string combined na estrutura para depois conseguir comparar com as restantes sugestões*/
+            if(*found < counter){
+                list[*found].word = strdup(combined);
+                list[*found].differences = 1;
+                (*found)++;
+            }
+        }
+    }
+}
+
 int calculate_differences(char *token, char *word){
     int tokenlen = strlen(token);
     int wordlen = strlen(word);
@@ -128,7 +153,9 @@ void suggestions(int counter, int alt, char *token, char **dictionary, int maxdi
             found++;
         }
     }
-
+    /*chamada da função split que verifica se a palavra errada pode ser formada a partir de outras duas palavras*/
+    split(token, dictionary, counter, list, &found, maxdiffs);
+    /*qsort para ordenar a list - para printar pela ordem especificada as sugestões*/
     qsort(list, found, sizeof(suggestion_data), compare_suggestions);
 
     for(int i = 0; i < found && i < alt; i++){
@@ -147,6 +174,13 @@ void suggestions(int counter, int alt, char *token, char **dictionary, int maxdi
             printf("%s", list[i].word);
         }
     }
+    /*free da memória alocadad para as palavras combinadas (combined)*/
+    for(int i = 0; i < found; i++) {
+        if (strchr(list[i].word, ' ') != NULL) {
+            free(list[i].word);
+        }
+    }
+
     free(list);
 }
 
