@@ -77,7 +77,7 @@ void print_help(){
 
 void split(char *word, char **dictionary, int counter, suggestion_data *list, int *found, int maxdiffs){
 
-    for(int i = 1; i < strlen(word); i++){
+    for(int i = 1; i < strlen(word) - 1; i++){
         char left[MAX_WORD], right[MAX_WORD];
 
         /*strncpy copia os primeiros i caracteres de uma string para a memória de outra string - left neste caso*/
@@ -85,13 +85,23 @@ void split(char *word, char **dictionary, int counter, suggestion_data *list, in
         left[i] = '\0'; /*finaliza a string*/
         strcpy(right, &word[i]); /*copia o resto que ficou, para a outra parte*/
 
+        /*só se ambas as partes existirem no dicionário é que as junta num combined*/
         if(binary_search(left, dictionary, counter) && binary_search(right, dictionary, counter)){
             /*combinar as novas strings numa só*/
             char combined[MAX_WORD * 2];
             snprintf(combined, sizeof(combined), "%s %s", left, right);
 
+            /*verifica se a palavra é duplicada*/
+            int duplicate = 0;
+            for(int j = 0; j < *found; j++){
+                if(strcasecmp(list[j].word, combined) == 0){
+                    duplicate = 1;
+                    break;
+                }
+            }
+
             /*armazena as informações da string combined na estrutura para depois conseguir comparar com as restantes sugestões*/
-            if(*found < counter){
+            if(!duplicate && *found < counter){
                 list[*found].word = strdup(combined);
                 list[*found].differences = 1;
                 (*found)++;
@@ -132,7 +142,7 @@ int calculate_differences(char *token, char *word){
         j++;
     }
     /*contar as restantes diferenças quando uma palavra acaba primeira que a outra*/
-    numberofdiffs += abs((tokenlen - i) - (wordlen - j));
+    numberofdiffs += abs(tokenlen - wordlen);
 
     return numberofdiffs;
 }
@@ -148,13 +158,23 @@ void suggestions(int counter, int alt, char *token, char **dictionary, int maxdi
     for(int i = 0; i < counter; i++){
         int diffs = calculate_differences(token, dictionary[i]);
         if(diffs <= maxdiffs){
-            list[found].word = dictionary[i];
-            list[found].differences = diffs;
-            found++;
+            int duplicate = 0;
+            for(int j = 0; j < found; j++){
+                if(strcasecmp(list[j].word, dictionary[i]) == 0){
+                    duplicate = 1;
+                    break;
+                }
+            }
+            if(!duplicate){
+                list[found].word = dictionary[i];
+                list[found].differences = diffs;
+                found++;
+            }
         }
     }
     /*chamada da função split que verifica se a palavra errada pode ser formada a partir de outras duas palavras*/
     split(token, dictionary, counter, list, &found, maxdiffs);
+    
     /*qsort para ordenar a list - para printar pela ordem especificada as sugestões*/
     qsort(list, found, sizeof(suggestion_data), compare_suggestions);
 

@@ -28,9 +28,11 @@ void clean_word(char *word);
 
 void print_help();
 
-void suggestions(int counter, int alt, char *token, char **dictionary, int maxdiffs, int argc, char *argv[], FILE *output_file);
+void split(char *word, char **dictionary, int counter, suggestion_data *list, int *found, int maxdiffs);
 
 int calculate_differences(char *token, char *word);
+
+void suggestions(int counter, int alt, char *token, char **dictionary, int maxdiffs, int argc, char *argv[], FILE *output_file);
 
 void mode1(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[]);
 
