@@ -38,4 +38,6 @@ void mode1(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
 
 void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[], int alt, char *word, int diffs);
 
+void mode3(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[], int alt, int diffs);
+
 #endif

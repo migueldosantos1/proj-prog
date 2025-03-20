@@ -286,6 +286,62 @@ void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
     }
 }
 
+void mode3(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[], int alt, int diffs){
+    char line[MAX_LINE];
+
+    while(fgets(line, sizeof(line), input_file)){
+        remove_newline(line);
+        char line_copy[MAX_LINE];
+        strcpy(line_copy, line);
+
+        char *token = strtok(line, " \t-");
+        char corrected_line[MAX_LINE] = "";
+        
+        while(token != NULL){
+            char original_word[MAX_WORD];
+            strcpy(original_word, token);
+            clean_word(token);
+
+            if(strspn(token, "0123456789") == strlen(token) || binary_search(token, dictionary, counter)){
+                strcat(corrected_line, original_word);
+            } 
+            else{
+                suggestion_data list[alt];
+                int found = 0;
+                for(int i = 0; i < counter && found < alt; i++){
+                    int diffs_count = calculate_differences(token, dictionary[i]);
+                    if(diffs_count <= diffs){
+                        list[found].word = dictionary[i];
+                        list[found].differences = diffs_count;
+                        found++;
+                    }
+                }
+
+                qsort(list, found, sizeof(suggestion_data), compare_suggestions);
+                
+                if(found > 0){
+                    strcat(corrected_line, list[0].word);
+                } 
+                else{
+                    strcat(corrected_line, original_word);
+                }
+            }
+            
+            token = strtok(NULL, " \t-");
+            if(token != NULL){
+                strcat(corrected_line, " ");
+            }
+        }
+
+        if(output(argc, argv)){
+            fprintf(output_file, "%s\n", corrected_line);
+        } 
+        else{
+            printf("%s\n", corrected_line);
+        }
+    }
+}
+
 int main(int argc, char *argv[]){
 
     char *dictionary_filename = NULL;
@@ -389,8 +445,14 @@ int main(int argc, char *argv[]){
     if(mode == 1){
         mode1(input_file, output_file, dictionary, counter, argc, argv);
     }
-    if(mode == 2){
+    else if(mode == 2){
         mode2(input_file, output_file, dictionary, counter, argc, argv, alt, word, diffs);
+    }
+    else if(mode == 3){
+        mode3(input_file, output_file, dictionary, counter, argc, argv, alt, diffs);
+    }
+    else{
+        printf("Modo inválido.\n");
     }
 
     /*se "-i" e "-o" não forem emitidos, fecha os ficheiros fornecidos*/
