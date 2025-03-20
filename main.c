@@ -147,6 +147,27 @@ int calculate_differences(char *token, char *word){
     return numberofdiffs;
 }
 
+int calculate_differences_reverse(char *token, char *word){
+    int tokenlen = strlen(token);
+    int wordlen = strlen(word);
+    int i = tokenlen - 1;
+    int j = wordlen - 1;
+    int numberofdiffs = 0;
+
+    while(i >= 0 && j >= 0){
+        if(tolower(token[i]) != tolower(word[j])){
+            numberofdiffs++;
+        }
+        i--;
+        j--;
+    }
+
+    numberofdiffs += abs((i + 1) - (j + 1));
+
+    /*contar as restantes diferenças quando uma palavra acaba primeira que a outra*/
+    return numberofdiffs;
+}
+
 void suggestions(int counter, int alt, char *token, char **dictionary, int maxdiffs, int argc, char *argv[], FILE *output_file){
     suggestion_data *list = malloc(counter * sizeof(suggestion_data));
     if(list == NULL){
@@ -157,7 +178,10 @@ void suggestions(int counter, int alt, char *token, char **dictionary, int maxdi
     int found = 0;
     for(int i = 0; i < counter; i++){
         int diffs = calculate_differences(token, dictionary[i]);
-        if(diffs <= maxdiffs){
+        int diffs_reverse = calculate_differences_reverse(token, dictionary[i]);
+        int min_diffs = (diffs < diffs_reverse) ? diffs : diffs_reverse;
+
+        if(min_diffs <= maxdiffs){
             int duplicate = 0;
             for(int j = 0; j < found; j++){
                 if(strcasecmp(list[j].word, dictionary[i]) == 0){
@@ -165,10 +189,14 @@ void suggestions(int counter, int alt, char *token, char **dictionary, int maxdi
                     break;
                 }
             }
-            if(!duplicate){
-                list[found].word = dictionary[i];
-                list[found].differences = diffs;
-                found++;
+            if (!duplicate && found < counter) {
+                list[found].word = strdup(dictionary[i]); // Copiar a palavra para a lista
+                if (list[found].word == NULL) {
+                    printf("Erro ao alocar memória para a sugestão.\n");
+                    return;
+                }
+                list[found].differences = min_diffs; // Atribuir o número de diferenças
+                found++; // Incrementar o contador de sugestões encontradas
             }
         }
     }
@@ -289,28 +317,31 @@ void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
 void mode3(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[], int alt, int diffs){
     char line[MAX_LINE];
 
-    while(fgets(line, sizeof(line), input_file)){
+    while (fgets(line, sizeof(line), input_file)) {
         remove_newline(line);
         char line_copy[MAX_LINE];
         strcpy(line_copy, line);
 
-        char *token = strtok(line, " \t-");
+        char *token = strtok(line, " \t");
         char corrected_line[MAX_LINE] = "";
-        
-        while(token != NULL){
+
+        while (token != NULL) {
             char original_word[MAX_WORD];
             strcpy(original_word, token);
+
+            int has_hyphen = (strchr(original_word, '-') != NULL);
+
             clean_word(token);
 
-            if(strspn(token, "0123456789") == strlen(token) || binary_search(token, dictionary, counter)){
+            if (strspn(token, "0123456789") == strlen(token) || binary_search(token, dictionary, counter)) {
                 strcat(corrected_line, original_word);
             } 
-            else{
+            else {
                 suggestion_data list[alt];
                 int found = 0;
-                for(int i = 0; i < counter && found < alt; i++){
+                for (int i = 0; i < counter && found < alt; i++) {
                     int diffs_count = calculate_differences(token, dictionary[i]);
-                    if(diffs_count <= diffs){
+                    if (diffs_count <= diffs) {
                         list[found].word = dictionary[i];
                         list[found].differences = diffs_count;
                         found++;
@@ -318,25 +349,30 @@ void mode3(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
                 }
 
                 qsort(list, found, sizeof(suggestion_data), compare_suggestions);
-                
-                if(found > 0){
-                    strcat(corrected_line, list[0].word);
+
+                if (found > 0) {
+                    // Se a palavra original tinha hífen, preservamos isso
+                    if (has_hyphen) {
+                        strcpy(original_word, list[0].word);  // Mantemos a estrutura
+                    } else {
+                        strcat(corrected_line, list[0].word);
+                    }
                 } 
-                else{
+                else {
                     strcat(corrected_line, original_word);
                 }
             }
-            
-            token = strtok(NULL, " \t-");
-            if(token != NULL){
+
+            token = strtok(NULL, " \t");
+            if (token != NULL) {
                 strcat(corrected_line, " ");
             }
         }
 
-        if(output(argc, argv)){
+        if (output(argc, argv)) {
             fprintf(output_file, "%s\n", corrected_line);
         } 
-        else{
+        else {
             printf("%s\n", corrected_line);
         }
     }
