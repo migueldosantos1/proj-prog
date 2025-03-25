@@ -143,7 +143,7 @@ int calculate_differences(char *token, char *word){
     }
     /*contar as restantes diferenças quando uma palavra acaba primeira que a outra*/
     numberofdiffs += abs(tokenlen - wordlen);
-
+    
     return numberofdiffs;
 }
 
@@ -179,6 +179,7 @@ void suggestions(int counter, int alt, char *token, char **dictionary, int maxdi
     for(int i = 0; i < counter; i++){
         int diffs = calculate_differences(token, dictionary[i]);
         int diffs_reverse = calculate_differences_reverse(token, dictionary[i]);
+        /*identificar qual das duas funções dá como output o menor número de diferenças*/
         int min_diffs = (diffs < diffs_reverse) ? diffs : diffs_reverse;
 
         if(min_diffs <= maxdiffs){
@@ -190,13 +191,13 @@ void suggestions(int counter, int alt, char *token, char **dictionary, int maxdi
                 }
             }
             if (!duplicate && found < counter) {
-                list[found].word = strdup(dictionary[i]); // Copiar a palavra para a lista
+                list[found].word = strdup(dictionary[i]); /*copia a palavra para a lista*/
                 if (list[found].word == NULL) {
                     printf("Erro ao alocar memória para a sugestão.\n");
                     return;
                 }
-                list[found].differences = min_diffs; // Atribuir o número de diferenças
-                found++; // Incrementar o contador de sugestões encontradas
+                list[found].differences = min_diffs; /*atribui o número de diferenças*/
+                found++; /*incrementa o contador de sugestões encontradas*/
             }
         }
     }
