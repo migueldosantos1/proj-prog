@@ -30,9 +30,9 @@ void print_help();
 
 void split(char *word, char **dictionary, int counter, suggestion_data *list, int *found, int maxdiffs);
 
-int calculate_differences(char *token, char *word);
+char* calculate_differences(char *token, char *word, int kanye);
 
-int calculate_differences_reverse(char *token, char *word);
+//int calculate_differences_reverse(char *token, char *word);
 
 void suggestions(int counter, int alt, char *token, char **dictionary, int maxdiffs, int argc, char *argv[], FILE *output_file);
 
@@ -40,6 +40,6 @@ void mode1(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
 
 void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[], int alt, char *word, int diffs);
 
-void mode3(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[], int alt, int diffs);
+//void mode3(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[], int alt, int diffs);
 
 #endif

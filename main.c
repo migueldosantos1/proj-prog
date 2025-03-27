@@ -110,44 +110,53 @@ void split(char *word, char **dictionary, int counter, suggestion_data *list, in
     }
 }
 
-int calculate_differences(char *token, char *word){
+char* calculate_differences(char *token, char *word, int kanye){
     int tokenlen = strlen(token);
     int wordlen = strlen(word);
-    int i = 0, j = 0, numberofdiffs = 0;
+    int i = 0, j = 0;
+    int num_diffs = 0;
+    int offset = kanye;
 
-    while(i < tokenlen && j < wordlen && tolower(token[i]) == tolower(word[j])){
-        i++;
-        j++;
-    }
-    /*se existe um deslocamento inicial (primeiros caracteres diferentes), contabiliza-se um erro*/
-    if(i < tokenlen && j < wordlen){
-        numberofdiffs++;
-        if(tokenlen > wordlen){
-            i++; /*avança no índice do token*/
-        } 
-        else if(wordlen > tokenlen){
-            j++; /*avança no índice da palavra do dicionário*/
-        } 
-        else{
+    while(i < tokenlen && j < wordlen){
+        if(tolower(token[i]) == tolower(word[j])){
             i++;
             j++;
+        } 
+        else{
+            num_diffs++;
+            if(num_diffs > kanye){
+                return NULL;
+            }
+
+            if(offset > 0){
+                if(tokenlen > wordlen){
+                    i += offset;
+                }
+                else if(wordlen > tokenlen){
+                    j += offset;
+                }
+                else{
+                    i += offset;
+                    j += offset;
+                }
+                offset = 0;
+            }
+            else{
+                i++;
+                j++;
+            }
         }
     }
-    /*continua a comparação normal das palavras, se uma letra tiver sido suprimida no início*/
-    while(i < tokenlen && j < wordlen){
-        if(tolower(token[i]) != tolower(word[j])){
-            numberofdiffs++;
-        }
-        i++;
-        j++;
+
+    num_diffs += abs((tokenlen - i) - (wordlen - j));
+
+    if(num_diffs <= kanye){
+        return word;
     }
-    /*contar as restantes diferenças quando uma palavra acaba primeira que a outra*/
-    numberofdiffs += abs(tokenlen - wordlen);
-    
-    return numberofdiffs;
+    return NULL;
 }
 
-int calculate_differences_reverse(char *token, char *word){
+/*int calculate_differences_reverse(char *token, char *word){
     int tokenlen = strlen(token);
     int wordlen = strlen(word);
     int i = tokenlen - 1;
@@ -164,9 +173,9 @@ int calculate_differences_reverse(char *token, char *word){
 
     numberofdiffs += abs((i + 1) - (j + 1));
 
-    /*contar as restantes diferenças quando uma palavra acaba primeira que a outra*/
+    //contar as restantes diferenças quando uma palavra acaba primeira que a outra
     return numberofdiffs;
-}
+}*/
 
 void suggestions(int counter, int alt, char *token, char **dictionary, int maxdiffs, int argc, char *argv[], FILE *output_file){
     suggestion_data *list = malloc(counter * sizeof(suggestion_data));
@@ -176,28 +185,24 @@ void suggestions(int counter, int alt, char *token, char **dictionary, int maxdi
     }
 
     int found = 0;
-    for(int i = 0; i < counter; i++){
-        int diffs = calculate_differences(token, dictionary[i]);
-        int diffs_reverse = calculate_differences_reverse(token, dictionary[i]);
-        /*identificar qual das duas funções dá como output o menor número de diferenças*/
-        int min_diffs = (diffs < diffs_reverse) ? diffs : diffs_reverse;
+    for (int i = 0; i < counter; i++) {
+        for (int diffs = 1; diffs <= maxdiffs; diffs++) {
+            char *sugestion = calculate_differences(token, dictionary[i], diffs);
+            if (sugestion) {
+                // Verificar se a sugestão já foi adicionada
+                int duplicado = 0;
+                for (int j = 0; j < found; j++) {
+                    if (strcasecmp(list[j].word, sugestion) == 0) {
+                        duplicado = 1;
+                        break;
+                    }
+                }
 
-        if(min_diffs <= maxdiffs){
-            int duplicate = 0;
-            for(int j = 0; j < found; j++){
-                if(strcasecmp(list[j].word, dictionary[i]) == 0){
-                    duplicate = 1;
-                    break;
+                if (!duplicado && found < counter) {
+                    list[found].word = strdup(sugestion);
+                    list[found].differences = diffs;
+                    found++;
                 }
-            }
-            if (!duplicate && found < counter) {
-                list[found].word = strdup(dictionary[i]); /*copia a palavra para a lista*/
-                if (list[found].word == NULL) {
-                    printf("Erro ao alocar memória para a sugestão.\n");
-                    return;
-                }
-                list[found].differences = min_diffs; /*atribui o número de diferenças*/
-                found++; /*incrementa o contador de sugestões encontradas*/
             }
         }
     }
@@ -224,12 +229,9 @@ void suggestions(int counter, int alt, char *token, char **dictionary, int maxdi
         }
     }
     /*free da memória alocadad para as palavras combinadas (combined)*/
-    for(int i = 0; i < found; i++) {
-        if (strchr(list[i].word, ' ') != NULL) {
-            free(list[i].word);
-        }
+    for (int i = 0; i < found; i++) {
+        free(list[i].word);
     }
-
     free(list);
 }
 
@@ -315,7 +317,7 @@ void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
     }
 }
 
-void mode3(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[], int alt, int diffs){
+/*void mode3(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[], int alt, int diffs){
     char line[MAX_LINE];
 
     while (fgets(line, sizeof(line), input_file)) {
@@ -378,6 +380,7 @@ void mode3(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
         }
     }
 }
+*/
 
 int main(int argc, char *argv[]){
 
@@ -485,9 +488,9 @@ int main(int argc, char *argv[]){
     else if(mode == 2){
         mode2(input_file, output_file, dictionary, counter, argc, argv, alt, word, diffs);
     }
-    else if(mode == 3){
+    /*else if(mode == 3){
         mode3(input_file, output_file, dictionary, counter, argc, argv, alt, diffs);
-    }
+    }*/
     else{
         printf("Modo inválido.\n");
     }
