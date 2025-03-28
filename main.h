@@ -30,7 +30,7 @@ void print_help();
  
 void split(char *word, char **dictionary, int counter, suggestion_data *list, int *found, int maxdiffs);
  
-int calculate_differences(char *token, char *word);
+int calculate_differences(char* word1, char* word2);
  
 int calculate_differences_reverse(char *token, char *word);
  
