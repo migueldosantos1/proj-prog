@@ -153,6 +153,68 @@ void find_suggestions(char* token, char* word, int offset, char **suggestions, i
             happened = 1;
         }
     }
+    /*reset às variáveis*/
+    int new_differences = 0, k = 0;
+    i = 0, j = 0;
+    if(tokenlen == wordlen){
+        while(k < tokenlen){
+            if(tolower(token[i]) == tolower(word[j])){
+                i++;
+                j++;
+            }
+            else{
+                new_differences++;
+                i++;
+                j++;
+            }
+            k++;
+        }
+        if(new_differences <= offset){
+            suggestions[*suggestion_count] = strdup(word);
+            (*suggestion_count)++;
+            return;
+        }
+    }
+    else if(tokenlen > wordlen){
+        while(k < tokenlen){
+            if(tolower(token[i]) == tolower(word[j])){
+                i++;
+                j++;
+            }
+            else{
+                new_differences++;
+                i++;
+                j++;
+            }
+            k++;
+        }
+        new_differences += abs(tokenlen - wordlen);
+        if(new_differences <= offset){
+            suggestions[*suggestion_count] = strdup(word);
+            (*suggestion_count)++;
+            return;
+        }
+    }
+    else{
+        while(k < wordlen){
+            if(tolower(token[i]) == tolower(word[j])){
+                i++;
+                j++;
+            }
+            else{
+                new_differences++;
+                i++;
+                j++;
+            }
+            k++;
+        }
+        new_differences += abs(tokenlen - wordlen);
+        if(new_differences <= offset){
+            suggestions[*suggestion_count] = strdup(word);
+            (*suggestion_count)++;
+            return;
+        }
+    }
 }
 
 void mode1(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[]){
