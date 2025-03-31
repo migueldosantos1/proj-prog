@@ -9,6 +9,17 @@ bool output(int argc, char *argv[]){
     return 0;
 }
 
+int already_exists(char **suggestions, int count, char *word){
+    for(int i = 0; i < count; i++){
+        if(strcmp(suggestions[i], word) == 0){
+            /*palavra já foi adicionada*/
+            return 1;
+        }
+    }
+    /*palavra não foi adicionada*/
+    return 0;
+}
+
 /*função que compara dois argumentos sem ter em conta maiúsculas*/
 int compare(const void *arg1, const void *arg2){
     return strcasecmp(*(const char **)arg1, *(const char **)arg2);
@@ -69,16 +80,16 @@ void split(char *word, char **dictionary, int counter, char **suggestions, int *
     for(int i = 1; i <= wordlen - 1; i++){
         char left[MAX_WORD], right[MAX_WORD];
 
-        // Copia a parte esquerda (primeiros i caracteres)
+        /*copia a parte esquerda da string*/
         strncpy(left, word, i);
         left[i] = '\0';
         
-        // Copia a parte direita (restante)
+        /*copia a parte direita da string*/
         strcpy(right, &word[i]);
 
-        // Verifica se ambas as partes existem no dicionário
+        /*verifica se ambas as partes da string estão no dicionário*/
         if(binary_search(left, dictionary, counter) && binary_search(right, dictionary, counter)){
-            // Combina as partes com um espaço
+            /*dá merge às duas partes e guarda em memória com um espaço*/
             char combined[MAX_WORD * 2];
             snprintf(combined, sizeof(combined), "%s %s", left, right);
 
@@ -97,6 +108,14 @@ void find_suggestions(char* token, char* word, int offset, char **suggestions, i
         i++;
         j++;
     }
+    if(i != (tokenlen - 1) && j == (wordlen) && (tokenlen != wordlen)){
+        differences += abs(tokenlen - wordlen);
+        if(!already_exists(suggestions, *suggestion_count, word) && (differences <= offset)){
+            suggestions[*suggestion_count] = strdup(word);
+            (*suggestion_count)++;
+            return;
+        }
+    }
     while(1){
         if((tolower(token[i]) != tolower(word[j]))){
             differences++;
@@ -107,6 +126,14 @@ void find_suggestions(char* token, char* word, int offset, char **suggestions, i
             storeI = i;
             storeJ = j;
             storeD = differences;
+
+            /*averigurar as diferenças entre caracteres não lidos quando o offset é incrementado*/
+            for(int l = i + 1; l < i + offset; l++){
+                if((tolower(token[l]) != tolower(word[j]))){
+                    differences++;
+                }
+            }
+
             i += offset;
             /*aumentar o índice da palavra errada --- token*/
             while(tolower(token[i]) == tolower(word[j])){
@@ -124,8 +151,9 @@ void find_suggestions(char* token, char* word, int offset, char **suggestions, i
                     return;
                 }
                 else if(i == (tokenlen - 1) && j == (wordlen - 1) && (tokenlen != wordlen)){
-                    differences += abs(tokenlen - wordlen);
-                    continue;
+                    suggestions[*suggestion_count] = strdup(word);
+                    (*suggestion_count)++;
+                    return;
                 }
             }
             storeJ += offset;
@@ -322,7 +350,6 @@ void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
                         free(suggestions[i]);
                     }
                 }
-
                 free(suggestions);
                 fprintf(output_file, "\n");
             }

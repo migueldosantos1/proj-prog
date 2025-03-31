@@ -11,6 +11,8 @@
  
 bool output(int argc, char *argv[]);
   
+int already_exists(char **suggestions, int count, char *word);
+
 int compare(const void *arg1, const void *arg2);
  
 int binary_search(char *word, char **dictionary, int size);
