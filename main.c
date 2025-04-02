@@ -9,9 +9,29 @@ bool output(int argc, char *argv[]){
     return 0;
 }
 
-int already_exists(char **suggestions, int count, char *word){
+int compare_suggestions(const void *a, const void *b){
+    const Suggestion *s1 = (const Suggestion *)a;
+    const Suggestion *s2 = (const Suggestion *)b;
+
+    if(s1->differences != s2->differences){
+        return s1->differences - s2->differences; /*ordenar pelas diferenças*/
+    }
+    return s1->index - s2->index; /*se as tiverem as mesmas diferenças, ordena pelo índice no dicionário*/
+}
+
+/*função que adiciona as informações das sugestões encontradas à estrutura*/
+void add_suggestion(Suggestion *suggestions, int *suggestion_count, char *word, int differences, int index){
+    if(!already_exists(suggestions, *suggestion_count, word)){
+        suggestions[*suggestion_count].word = strdup(word);
+        suggestions[*suggestion_count].differences = differences;
+        suggestions[*suggestion_count].index = index;
+        (*suggestion_count)++;
+    }
+}
+
+int already_exists(Suggestion *suggestions, int count, char *word){
     for(int i = 0; i < count; i++){
-        if(strcmp(suggestions[i], word) == 0){
+        if(strcmp(suggestions[i].word, word) == 0){
             /*palavra já foi adicionada*/
             return 1;
         }
@@ -74,7 +94,7 @@ void print_help(){
     printf("-m nn           o modo de funcionamento do programa deve ser nn\n");
 }
 
-void split(char *word, char **dictionary, int counter, char **suggestions, int *suggestion_count, int offset, int alt){
+void split(char *word, char **dictionary, int counter, Suggestion *suggestions, int *suggestion_count, int offset, int alt){
     int wordlen = strlen(word);
     
     for(int i = 1; i <= wordlen - 1; i++){
@@ -89,17 +109,24 @@ void split(char *word, char **dictionary, int counter, char **suggestions, int *
 
         /*verifica se ambas as partes da string estão no dicionário*/
         if(binary_search(left, dictionary, counter) && binary_search(right, dictionary, counter)){
+            int left_index = -1;
+            for(int j = 0; j < counter; j++){
+                if(strcasecmp(left, dictionary[j]) == 0){
+                    left_index = j;
+                    break;
+                }
+            }
             /*dá merge às duas partes e guarda em memória com um espaço*/
-            char combined[MAX_WORD * 2];
-            snprintf(combined, sizeof(combined), "%s %s", left, right);
-
-            suggestions[*suggestion_count] = strdup(combined);
-            (*suggestion_count)++;
+            if(left_index != -1){
+                char combined[MAX_WORD * 2];
+                snprintf(combined, sizeof(combined), "%s %s", left, right);
+                add_suggestion(suggestions, suggestion_count, combined, 1, left_index);
+            }
         }
     }
 }
 
-void find_suggestions(char* token, char* word, int offset, char **suggestions, int *suggestion_count, int alt){
+void find_suggestions(char* token, char* word, int offset, Suggestion *suggestions, int *suggestion_count, int alt, int index){
     int tokenlen = strlen(token);
     int wordlen = strlen(word);
     int i = 0, j = 0, happened = 0, differences = 0, storeI = 0, storeJ = 0, storeD = 0;
@@ -112,8 +139,7 @@ void find_suggestions(char* token, char* word, int offset, char **suggestions, i
     if(i != (tokenlen - 1) && j == (wordlen) && (tokenlen != wordlen)){
         differences += abs(tokenlen - wordlen);
         if(!already_exists(suggestions, *suggestion_count, word) && (differences <= offset)){
-            suggestions[*suggestion_count] = strdup(word);
-            (*suggestion_count)++;
+            add_suggestion(suggestions, suggestion_count, word, differences, index);
             return;
         }
     }
@@ -128,12 +154,13 @@ void find_suggestions(char* token, char* word, int offset, char **suggestions, i
             storeJ = j;
             storeD = differences;
 
+            /*VER ESTE CICLO, ADICIONA A TUDO 1 DIFERENÇA QUE NÃO É SUPOSTO, MAS ASSIM APARECE O CERES*/
             /*averigurar as diferenças entre caracteres não lidos quando o offset é incrementado*/
-            for(int l = i + 1; l < i + offset; l++){
+            /*for(int l = i + 1; l < i + offset; l++){
                 if((tolower(token[l]) != tolower(word[j]))){
                     differences++;
                 }
-            }
+            }*/
 
             i += offset;
             /*aumentar o índice da palavra errada --- token*/
@@ -147,13 +174,11 @@ void find_suggestions(char* token, char* word, int offset, char **suggestions, i
                     continue;
                 }
                 if(!already_exists(suggestions, *suggestion_count, word) && i == (tokenlen - 1) && j == (wordlen - 1) && (tokenlen == wordlen) && (differences <= offset)){
-                    suggestions[*suggestion_count] = strdup(word);
-                    (*suggestion_count)++;
+                    add_suggestion(suggestions, suggestion_count, word, differences, index);
                     return;
                 }
                 else if(!already_exists(suggestions, *suggestion_count, word) && i == (tokenlen - 1) && j == (wordlen - 1) && (tokenlen != wordlen)){
-                    suggestions[*suggestion_count] = strdup(word);
-                    (*suggestion_count)++;
+                    add_suggestion(suggestions, suggestion_count, word, differences, index);
                     return;
                 }
             }
@@ -169,13 +194,11 @@ void find_suggestions(char* token, char* word, int offset, char **suggestions, i
                     continue;
                 }
                 if(!already_exists(suggestions, *suggestion_count, word) && storeI == (tokenlen - 1) && storeJ == (wordlen - 1) && (tokenlen == wordlen) && (storeD <= offset)){
-                    suggestions[*suggestion_count] = strdup(word);
-                    (*suggestion_count)++;
+                    add_suggestion(suggestions, suggestion_count, word, differences, index);
                     return;
                 }
                 else if(!already_exists(suggestions, *suggestion_count, word) && storeI == (tokenlen - 1) && storeJ == (wordlen - 1) && (tokenlen != wordlen)){
-                    suggestions[*suggestion_count] = strdup(word);
-                    (*suggestion_count)++;
+                    add_suggestion(suggestions, suggestion_count, word, differences, index);
                     return;
                 }
             }
@@ -200,8 +223,7 @@ void find_suggestions(char* token, char* word, int offset, char **suggestions, i
             k++;
         }
         if(!already_exists(suggestions, *suggestion_count, word) && new_differences <= offset){
-            suggestions[*suggestion_count] = strdup(word);
-            (*suggestion_count)++;
+            add_suggestion(suggestions, suggestion_count, word, differences, index);
             return;
         }
     }
@@ -221,8 +243,7 @@ void find_suggestions(char* token, char* word, int offset, char **suggestions, i
         }
         new_differences += abs(tokenlen - wordlen);
         if(!already_exists(suggestions, *suggestion_count, word) && new_differences <= offset){
-            suggestions[*suggestion_count] = strdup(word);
-            (*suggestion_count)++;
+            add_suggestion(suggestions, suggestion_count, word, differences, index);
             return;
         }
     }
@@ -242,8 +263,7 @@ void find_suggestions(char* token, char* word, int offset, char **suggestions, i
         }
         new_differences += abs(tokenlen - wordlen);
         if(!already_exists(suggestions, *suggestion_count, word) && new_differences <= offset){
-            suggestions[*suggestion_count] = strdup(word);
-            (*suggestion_count)++;
+            add_suggestion(suggestions, suggestion_count, word, differences, index);
             return;
         }
     }
@@ -258,8 +278,7 @@ void find_suggestions(char* token, char* word, int offset, char **suggestions, i
         if(!already_exists(suggestions, *suggestion_count, word) && i == (tokenlen - 1) && (wordlen > tokenlen)){
             differences += abs(tokenlen - wordlen);
             if(differences <= offset){
-                suggestions[*suggestion_count] = strdup(word);
-                (*suggestion_count)++;
+                add_suggestion(suggestions, suggestion_count, word, differences, index);
                 return;
             }
         }
@@ -268,7 +287,7 @@ void find_suggestions(char* token, char* word, int offset, char **suggestions, i
     }
 }
 
-void find_suggestions_reversed(char* token, char* word, int offset, char **suggestions, int *suggestion_count, int alt){
+void find_suggestions_reversed(char* token, char* word, int offset, Suggestion *suggestions, int *suggestion_count, int alt, int index){
     int tokenlen = strlen(token);
     int wordlen = strlen(word);
     int i = (tokenlen - 1), j = (wordlen - 1), differences = 0;
@@ -287,8 +306,7 @@ void find_suggestions_reversed(char* token, char* word, int offset, char **sugge
         }
         /*apenas encontra uma palavra alternativa se o número de diferenças de que andamos à procura for igual ao valor especificado na linha de comandos*/
         if(!already_exists(suggestions, *suggestion_count, word) && differences == offset){
-            suggestions[*suggestion_count] = strdup(word);
-            (*suggestion_count)++;
+            add_suggestion(suggestions, suggestion_count, word, differences, index);
             return;
         }
     }
@@ -309,15 +327,14 @@ void find_suggestions_reversed(char* token, char* word, int offset, char **sugge
         differences += abs(tokenlen - wordlen);
         /*apenas encontra uma palavra alternativa se o número de diferenças de que andamos à procura for igual ao valor especificado na linha de comandos*/
         if(!already_exists(suggestions, *suggestion_count, word) && differences == offset){
-            suggestions[*suggestion_count] = strdup(word);
-            (*suggestion_count)++;
+            add_suggestion(suggestions, suggestion_count, word, differences, index);
             return;
         }
     }
     /*reset das variáveis*/
     i = (tokenlen - 1), j = (wordlen - 1), differences = 0;
     if(wordlen > tokenlen){
-        for(int k = 0; k < wordlen; k++){
+        for(int k = 0; k < tokenlen; k++){
             if(tolower(token[i]) == tolower(word[j])){
                 i--;
                 j--;
@@ -330,9 +347,8 @@ void find_suggestions_reversed(char* token, char* word, int offset, char **sugge
         }
         differences += abs(tokenlen - wordlen);
         /*apenas encontra uma palavra alternativa se o número de diferenças de que andamos à procura for igual ao valor especificado na linha de comandos*/
-        if(differences == offset){
-            suggestions[*suggestion_count] = strdup(word);
-            (*suggestion_count)++;
+        if(!already_exists(suggestions, *suggestion_count, word) && differences == offset){
+            add_suggestion(suggestions, suggestion_count, word, differences, index);
             return;
         }
     }
@@ -413,7 +429,7 @@ void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
                     printf("Erro na palavra \"%s\"\n", token);
                 }
 
-                char **suggestions = (char **)malloc(alt * MAX_WORD * sizeof(char *));
+                Suggestion *suggestions = (Suggestion *)malloc(alt * MAX_WORD * sizeof(Suggestion));
                 int suggestion_count = 0;
 
                 split(token, dictionary, counter, suggestions, &suggestion_count, diffs, alt);
@@ -421,32 +437,33 @@ void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
                 for(int offset = 1; offset <= diffs; offset++){
                     for(int j = 0; j < counter; j++){
                         if(suggestion_count < alt){
-                            find_suggestions(token, dictionary[j], offset, suggestions, &suggestion_count, alt);
+                            find_suggestions(token, dictionary[j], offset, suggestions, &suggestion_count, alt, j);
                         }
                     }
                 }
                 /*chamada da função que percorre as palavras do fim para o início*/
                 for(int p = 0; p < counter; p++){
                     if(suggestion_count < alt){
-                        find_suggestions_reversed(token, dictionary[p], diffs, suggestions, &suggestion_count, alt);
+                        find_suggestions_reversed(token, dictionary[p], diffs, suggestions, &suggestion_count, alt, p);
                     }
                 }
+
+                qsort(suggestions, suggestion_count, sizeof(Suggestion), compare_suggestions);
 
                 if(suggestion_count > 0){
                     for(int i = 0; i < suggestion_count; i++){
                         if(output(argc, argv) == 1){
-                            fprintf(output_file, "%s", suggestions[i]);
-                            if(i < (suggestion_count - 1)){
-                                fprintf(output_file, ", ");
-                            }
-                        }
+                            fprintf(output_file, "%s", suggestions[i].word);
+                        } 
                         else{
-                            printf("%s", suggestions[i]);
-                            if(i < (suggestion_count - 1)){
-                                printf(", ");
-                            }
+                            printf("%s", suggestions[i].word);
                         }
-                        free(suggestions[i]);
+                        if(i < (suggestion_count - 1)){
+                            fprintf(output_file, ", ");
+                        }
+                        printf("Sugestão: %s (Dif: %d, Index: %d)\n", suggestions[i].word, suggestions[i].differences, suggestions[i].index);
+
+                        free(suggestions[i].word);
                     }
                 }
                 free(suggestions);
