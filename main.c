@@ -185,6 +185,7 @@ void find_suggestions(char* token, char* word, int offset, char **suggestions, i
     /*reset às variáveis*/
     int new_differences = 0, k = 0;
     i = 0, j = 0;
+    /*palavras com tamanho igual*/
     if(tokenlen == wordlen){
         while(k < tokenlen){
             if(tolower(token[i]) == tolower(word[j])){
@@ -204,6 +205,7 @@ void find_suggestions(char* token, char* word, int offset, char **suggestions, i
             return;
         }
     }
+    /*palavra errada maior que a palavra do dicionário*/
     else if(tokenlen > wordlen){
         while(k < tokenlen){
             if(tolower(token[i]) == tolower(word[j])){
@@ -224,6 +226,7 @@ void find_suggestions(char* token, char* word, int offset, char **suggestions, i
             return;
         }
     }
+    /*palavra do dicionário maior que a palavra errada*/
     else{
         while(k < wordlen){
             if(tolower(token[i]) == tolower(word[j])){
@@ -262,6 +265,76 @@ void find_suggestions(char* token, char* word, int offset, char **suggestions, i
         }
         i++;
         j++;
+    }
+}
+
+void find_suggestions_reversed(char* token, char* word, int offset, char **suggestions, int *suggestion_count, int alt){
+    int tokenlen = strlen(token);
+    int wordlen = strlen(word);
+    int i = (tokenlen - 1), j = (wordlen - 1), differences = 0;
+    
+    if(tokenlen == wordlen){
+        for(int k = 0; k < tokenlen; k++){
+            if(tolower(token[i]) == tolower(word[j])){
+                i--;
+                j--;
+            }
+            else{
+                differences++;
+                i--;
+                j--;
+            }
+        }
+        /*apenas encontra uma palavra alternativa se o número de diferenças de que andamos à procura for igual ao valor especificado na linha de comandos*/
+        if(!already_exists(suggestions, *suggestion_count, word) && differences == offset){
+            suggestions[*suggestion_count] = strdup(word);
+            (*suggestion_count)++;
+            return;
+        }
+    }
+    /*reset das variáveis*/
+    i = (tokenlen - 1), j = (wordlen - 1), differences = 0;
+    if(tokenlen > wordlen){
+        for(int k = 0; k < wordlen; k++){
+            if(tolower(token[i]) == tolower(word[j])){
+                i--;
+                j--;
+            }
+            else{
+                differences++;
+                i--;
+                j--;
+            }
+        }
+        differences += abs(tokenlen - wordlen);
+        /*apenas encontra uma palavra alternativa se o número de diferenças de que andamos à procura for igual ao valor especificado na linha de comandos*/
+        if(!already_exists(suggestions, *suggestion_count, word) && differences == offset){
+            suggestions[*suggestion_count] = strdup(word);
+            (*suggestion_count)++;
+            return;
+        }
+    }
+    /*reset das variáveis*/
+    i = (tokenlen - 1), j = (wordlen - 1), differences = 0;
+    if(wordlen > tokenlen){
+        for(int k = 0; k < wordlen; k++){
+            if(tolower(token[i]) == tolower(word[j])){
+                i--;
+                j--;
+            }
+            else{
+                differences++;
+                i--;
+                j--;
+            }
+        }
+        differences += abs(tokenlen - wordlen);
+        /*apenas encontra uma palavra alternativa se o número de diferenças de que andamos à procura for igual ao valor especificado na linha de comandos*/
+        if(differences == offset){
+            suggestions[*suggestion_count] = strdup(word);
+            (*suggestion_count)++;
+            return;
+        }
     }
 }
 
@@ -350,6 +423,12 @@ void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
                         if(suggestion_count < alt){
                             find_suggestions(token, dictionary[j], offset, suggestions, &suggestion_count, alt);
                         }
+                    }
+                }
+                /*chamada da função que percorre as palavras do fim para o início*/
+                for(int p = 0; p < counter; p++){
+                    if(suggestion_count < alt){
+                        find_suggestions_reversed(token, dictionary[p], diffs, suggestions, &suggestion_count, alt);
                     }
                 }
 
