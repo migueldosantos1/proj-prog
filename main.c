@@ -135,7 +135,7 @@ void find_suggestions(char* token, char* word, int offset, Suggestion *suggestio
         i++;
         j++;
     }
-    /*para encontrar o cent*/
+    /*para encontrar o cent --- j == wordlen pq já sai do ciclo acima com os índices incrementados, não contabilizando a fim das palavras*/
     if(i != (tokenlen - 1) && j == (wordlen) && (tokenlen != wordlen)){
         differences += abs(tokenlen - wordlen);
         if(!already_exists(suggestions, *suggestion_count, word) && (differences <= offset)){
@@ -154,13 +154,12 @@ void find_suggestions(char* token, char* word, int offset, Suggestion *suggestio
             storeJ = j;
             storeD = differences;
 
-            /*VER ESTE CICLO, ADICIONA A TUDO 1 DIFERENÇA QUE NÃO É SUPOSTO, MAS ASSIM APARECE O CERES*/
-            /*averigurar as diferenças entre caracteres não lidos quando o offset é incrementado*/
-            /*for(int l = i + 1; l < i + offset; l++){
-                if((tolower(token[l]) != tolower(word[j]))){
+            /*averigurar se a diferenças entre os comprimentos das palavras é maior que 1, se sim, incrementa 1*/
+            for(int l = i + 1; l < i + offset; l++){
+                if((tolower(token[l]) != tolower(word[j])) && abs(tokenlen - wordlen) > 1){
                     differences++;
                 }
-            }*/
+            }
 
             i += offset;
             /*aumentar o índice da palavra errada --- token*/
@@ -194,11 +193,11 @@ void find_suggestions(char* token, char* word, int offset, Suggestion *suggestio
                     continue;
                 }
                 if(!already_exists(suggestions, *suggestion_count, word) && storeI == (tokenlen - 1) && storeJ == (wordlen - 1) && (tokenlen == wordlen) && (storeD <= offset)){
-                    add_suggestion(suggestions, suggestion_count, word, differences, index);
+                    add_suggestion(suggestions, suggestion_count, word, storeD, index);
                     return;
                 }
                 else if(!already_exists(suggestions, *suggestion_count, word) && storeI == (tokenlen - 1) && storeJ == (wordlen - 1) && (tokenlen != wordlen)){
-                    add_suggestion(suggestions, suggestion_count, word, differences, index);
+                    add_suggestion(suggestions, suggestion_count, word, storeD, index);
                     return;
                 }
             }
@@ -223,7 +222,7 @@ void find_suggestions(char* token, char* word, int offset, Suggestion *suggestio
             k++;
         }
         if(!already_exists(suggestions, *suggestion_count, word) && new_differences <= offset){
-            add_suggestion(suggestions, suggestion_count, word, differences, index);
+            add_suggestion(suggestions, suggestion_count, word, new_differences, index);
             return;
         }
     }
@@ -243,7 +242,7 @@ void find_suggestions(char* token, char* word, int offset, Suggestion *suggestio
         }
         new_differences += abs(tokenlen - wordlen);
         if(!already_exists(suggestions, *suggestion_count, word) && new_differences <= offset){
-            add_suggestion(suggestions, suggestion_count, word, differences, index);
+            add_suggestion(suggestions, suggestion_count, word, new_differences, index);
             return;
         }
     }
@@ -263,7 +262,7 @@ void find_suggestions(char* token, char* word, int offset, Suggestion *suggestio
         }
         new_differences += abs(tokenlen - wordlen);
         if(!already_exists(suggestions, *suggestion_count, word) && new_differences <= offset){
-            add_suggestion(suggestions, suggestion_count, word, differences, index);
+            add_suggestion(suggestions, suggestion_count, word, new_differences, index);
             return;
         }
     }
@@ -461,7 +460,7 @@ void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
                         if(i < (suggestion_count - 1)){
                             fprintf(output_file, ", ");
                         }
-                        printf("Sugestão: %s (Dif: %d, Index: %d)\n", suggestions[i].word, suggestions[i].differences, suggestions[i].index);
+                        //printf("Sugestão: %s (Dif: %d, Index: %d)\n", suggestions[i].word, suggestions[i].differences, suggestions[i].index);
 
                         free(suggestions[i].word);
                     }
