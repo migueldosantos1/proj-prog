@@ -12,16 +12,16 @@ Erro na palavra "gasogene"
 gasolene, gasoline
 86: of your left shoe, just where the firelight strikes it, the leather is
 Erro na palavra "firelight"
-fire light, firefight, foresight, limelight, sidelight
+fire light, firefight, firefight's, firefights, foresight, limelight, sidelight
 91: particularly malignant boot-slitting specimen of the London slavey. As
 Erro na palavra "slavey"
-slave y, slaved, slaver, slaves, clayey, enslaved, enslaves, shaved, shaven, shaver
+slave y, slave, slaved, slaver, slaves, clayey, Lacey, shave, shaved, shaven
 93: iodoform, with a black mark of nitrate of silver upon his right
 Erro na palavra "iodoform"
 
 142: "I have no data yet. It is a capital mistake to theorise before one has
 Erro na palavra "theorise"
-theorist, theorize, theories, theorists
+theorist, theorize, theories, theorists, theorized, theorizes
 151: endeavouring to imitate my companion's processes. "Such paper could not
 Erro na palavra "endeavouring"
 endeavoring
@@ -30,39 +30,39 @@ Erro na palavra "Gesellschaft"
 
 167: our 'Co.' 'P,' of course, stands for 'Papier.' Now for the 'Eg.' Let us
 Erro na palavra "Papier"
-Napier, Pa pier, panier, paper, rapier, babier, cagier, copier, dapper, dopier
+Napier, PA pier, panier, paper, rapier, apter, babier, cagier, copier, dapper
 Erro na palavra "Eg"
-Ag, beg, E g, ea, EC, Ed, ed, eh, em, ER
+Ag, beg, E g, E, ea, EC, Ed, egg, ego, eh
 169: from his shelves. "Eglow, Eglonitz-here we are, Egria. It is in a
 Erro na palavra "Eglow"
-aglow, E glow, glow, allow, below, elbow, endow, igloo, low, Yalow
+aglow, E glow, glow, allow, Bellow, below, blow, Eggo, elbow, endow
 Erro na palavra "Eglonitz"
 
 Erro na palavra "Egria"
-Atria, atria, Beria, eerie, egret, Elvia, Luria, Maria, maria, Syria
+aria, Atria, Beria, eerie, egret, Elvia, Gaia, grid, grim, grin
 181: that. It is the German who is so uncourteous to his verbs. It only
 Erro na palavra "uncourteous"
-un courteous, courteous
+UN courteous, courteous
 192: the window. "A nice little brougham and a pair of beauties. A hundred
 Erro na palavra "brougham"
-
+brought
 217: thrown over his shoulders was lined with flame-coloured silk and
 Erro na palavra "coloured"
 colored, collared, colluded, conjured, cultured, floured
 223: part of his face, extending down past the cheekbones, a black vizard
 Erro na palavra "vizard"
-lizard, wizard, hazard, vicars, visaed, vizors
+lizard, wizard, hazard, lizards, Mizar, vicar, vicars, visaed, vizor, vizors
 236: have I the honour to address?"
 Erro na palavra "honour"
-hon our, concur, honors, hour
+Hon our, honor, concur, honors, hour
 238: "You may address me as the Count Von Kramm, a Bohemian nobleman. I
 Erro na palavra "Von"
-Avon, con, Don, don, eon, Hon, ion, Jon, Lon, V on
+Avon, con, Don, eon, Hon, ion, Jon, Lon, Mon, non
 Erro na palavra "Kramm"
-cramp, crams, drama, drams, frame, Fromm, grams, Grimm, Kraft, Kramer
+cram, cramp, crams, dram, drama, drams, frame, Fromm, gram, Grammy
 239: understand that this gentleman, your friend, is a man of honour and
 Erro na palavra "honour"
-hon our, concur, honors, hour
+Hon our, honor, concur, honors, hour
 268: plainly, the matter implicates the great House of Ormstein, hereditary
 Erro na palavra "Ormstein"
 
@@ -72,26 +72,26 @@ Erro na palavra "Gottsreich"
 Erro na palavra "Sigismond"
 Sigismund
 Erro na palavra "von"
-Avon, con, Don, don, eon, Hon, ion, Jon, Lon, v on
+Avon, con, Don, eon, Hon, ion, Jon, Lon, Mon, non
 289: Ormstein, Grand Duke of Cassel-Felstein, and hereditary King of
 Erro na palavra "Ormstein"
 
 Erro na palavra "Cassel"
-passel, tassel, basses, Bessel, cancel, caressed, caresses, carpel, carrel, cartel
+passel, tassel, asses, asset, basses, Bessel, cancel, carpel, carrel, cartel
 Erro na palavra "Felstein"
 Epstein, Holstein
 314: Contralto-hum! La Scala, hum! Prima donna Imperial Opera of Warsaw-yes!
 Erro na palavra "Prima"
-Prim a, prime, primp, aroma, brims, crime, crimp, drama, Erica, Erika
+prim, primal, prime, primp, aroma, brim, brims, crime, crimp, drama
 393: "To Clotilde Lothman von Saxe-Meningen, second daughter of the King of
 Erro na palavra "Clotilde"
 
 Erro na palavra "Lothman"
-Loth man
+
 Erro na palavra "von"
-Avon, con, Don, don, eon, Hon, ion, Jon, Lon, v on
+Avon, con, Don, eon, Hon, ion, Jon, Lon, Mon, non
 Erro na palavra "Saxe"
-axe, S axe, Sade, safe, sage, sake, sale, same, sane, Sax e
+axe, S axe, Sade, safe, sage, sake, sale, same, sane, SASE
 Erro na palavra "Meningen"
 
 420: "Certainly. You will find me at the Langham under the name of the Count
@@ -99,15 +99,15 @@ Erro na palavra "Langham"
 Lang ham, gingham, Maugham
 421: Von Kramm."
 Erro na palavra "Von"
-Avon, con, Don, don, eon, Hon, ion, Jon, Lon, V on
+Avon, con, Don, eon, Hon, ion, Jon, Lon, Mon, non
 Erro na palavra "Kramm"
-cramp, crams, drama, drams, frame, Fromm, grams, Grimm, Kraft, Kramer
+cram, cramp, crams, dram, drama, drams, frame, Fromm, gram, Grammy
 429: "You have carte blanche."
 Erro na palavra "carte"
-ca rte, cart e, carts, carve, caste, Harte, barge, Barth, baste, cable
+CA rte, care, cart e, cart, carted, cartel, Carter, carts, carve, caste
 449: "Is Briony Lodge, Serpentine Avenue, St. John's Wood."
 Erro na palavra "Briony"
-briny, bony, brainy, brawny, Briana, priory
+briny, bony, brainy, brawny, Brian, Briana, Bryon, Orion, priory
 458: wheels of the royal brougham rolled down the street. "If you will be
 Erro na palavra "brougham"
-
+brought

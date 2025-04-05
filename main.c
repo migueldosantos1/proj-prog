@@ -31,7 +31,7 @@ void add_suggestion(Suggestion *suggestions, int *suggestion_count, char *word, 
 
 int already_exists(Suggestion *suggestions, int count, char *word){
     for(int i = 0; i < count; i++){
-        if(strcmp(suggestions[i].word, word) == 0){
+        if(strcasecmp(suggestions[i].word, word) == 0){
             /*palavra já foi adicionada*/
             return 1;
         }
@@ -94,34 +94,77 @@ void print_help(){
     printf("-m nn           o modo de funcionamento do programa deve ser nn\n");
 }
 
-void split(char *word, char **dictionary, int counter, Suggestion *suggestions, int *suggestion_count, int offset, int alt){
+void split(char *word, char **dictionary, int counter, Suggestion *suggestions, int *suggestion_count, int offset, int alt) {
     int wordlen = strlen(word);
     
-    for(int i = 1; i <= wordlen - 1; i++){
+    for(int i = 1; i <= wordlen - 1; i++) {
         char left[MAX_WORD], right[MAX_WORD];
+        char left_upper[MAX_WORD], right_upper[MAX_WORD];
+        char left_capitalized[MAX_WORD], right_lower[MAX_WORD];
 
-        /*copia a parte esquerda da string*/
+        /* Copia as partes */
         strncpy(left, word, i);
         left[i] = '\0';
-        
-        /*copia a parte direita da string*/
         strcpy(right, &word[i]);
 
-        /*verifica se ambas as partes da string estão no dicionário*/
-        if(binary_search(left, dictionary, counter) && binary_search(right, dictionary, counter)){
-            int left_index = -1;
-            for(int j = 0; j < counter; j++){
-                if(strcasecmp(left, dictionary[j]) == 0){
-                    left_index = j;
-                    break;
-                }
+        /* Cria versões em maiúsculas */
+        strcpy(left_upper, left);
+        strcpy(right_upper, right);
+        for(char *p = left_upper; *p; p++) *p = toupper(*p);
+
+        /* Cria versões capitalizadas (primeira letra maiúscula) para esquerda */
+        if(left[0]) {
+            strcpy(left_capitalized, left);
+            left_capitalized[0] = toupper(left[0]);
+            for(char *p = left_capitalized+1; *p; p++) *p = tolower(*p);
+        }
+
+        /* Cria versão em minúsculas para direita */
+        strcpy(right_lower, right);
+        for(char *p = right_lower; *p; p++) *p = tolower(*p);
+
+        /* Variáveis para armazenar as melhores correspondências */
+        char *best_left = NULL;
+        char *best_right = NULL;
+        int best_left_index = counter;
+        int best_right_index = counter;
+
+        /* Busca no dicionário com prioridades */
+        for(int j = 0; j < counter; j++) {
+            /* Verifica CAPS LOCK primeiro (maior prioridade) para esquerda */
+            if(strcmp(left_upper, dictionary[j]) == 0 && j < best_left_index) {
+                best_left = dictionary[j];
+                best_left_index = j;
             }
-            /*dá merge às duas partes e guarda em memória com um espaço*/
-            if(left_index != -1){
-                char combined[MAX_WORD * 2];
-                snprintf(combined, sizeof(combined), "%s %s", left, right);
-                add_suggestion(suggestions, suggestion_count, combined, 1, left_index);
+            /* Depois verifica capitalizado (segunda prioridade) para esquerda */
+            else if(strcmp(left_capitalized, dictionary[j]) == 0 && j < best_left_index && best_left == NULL) {
+                best_left = dictionary[j];
+                best_left_index = j;
             }
+            /* Por último verifica a versão original (terceira prioridade) para esquerda */
+            else if(strcmp(left, dictionary[j]) == 0 && j < best_left_index && best_left == NULL) {
+                best_left = dictionary[j];
+                best_left_index = j;
+            }
+
+            /* Para a direita: verifica versão original primeiro */
+            if(strcmp(right, dictionary[j]) == 0 && j < best_right_index) {
+                best_right = dictionary[j];
+                best_right_index = j;
+            }
+            /* Por último verifica versão em minúsculas */
+            else if(strcmp(right_lower, dictionary[j]) == 0 && j < best_right_index && best_right == NULL) {
+                best_right = dictionary[j];
+                best_right_index = j;
+            }
+        }
+
+        /* Se encontrou ambas as partes */
+        if(best_left && best_right) {
+            char combined[MAX_WORD * 2];
+            snprintf(combined, sizeof(combined), "%s %s", best_left, best_right);
+            
+            add_suggestion(suggestions, suggestion_count, combined, 1, best_left_index);
         }
     }
 }
@@ -129,11 +172,15 @@ void split(char *word, char **dictionary, int counter, Suggestion *suggestions, 
 void find_suggestions(char* token, char* word, int offset, Suggestion *suggestions, int *suggestion_count, int alt, int index){
     int tokenlen = strlen(token);
     int wordlen = strlen(word);
-    int i = 0, j = 0, happened = 0, differences = 0, storeI = 0, storeJ = 0, storeD = 0;
+    int i = 0, j = 0, happened = 0, differences = 0, storeI = 0, storeJ = 0, storeD = 0, kdot = 0;
 
     while(tolower(token[i]) == tolower(word[j])){
         i++;
         j++;
+        if(i == (tokenlen - 1) || j == (wordlen - 1)){
+            kdot = 1;
+            continue;
+        }
     }
     /*para encontrar o cent --- j == wordlen pq já sai do ciclo acima com os índices incrementados, não contabilizando a fim das palavras*/
     if(i != (tokenlen - 1) && j == (wordlen) && (tokenlen != wordlen)){
@@ -158,14 +205,17 @@ void find_suggestions(char* token, char* word, int offset, Suggestion *suggestio
             for(int l = i + 1; l < i + offset; l++){
                 if((tolower(token[l]) != tolower(word[j])) && abs(tokenlen - wordlen) > 1){
                     differences++;
+                    storeD++;
                 }
             }
 
             i += offset;
             /*aumentar o índice da palavra errada --- token*/
             while(tolower(token[i]) == tolower(word[j])){
-                i++;
-                j++;
+                if(kdot == 0){
+                    i++;
+                    j++;
+                }
                 if((tolower(token[i]) != tolower(word[j]))){
                     differences++;
                 }
@@ -179,6 +229,10 @@ void find_suggestions(char* token, char* word, int offset, Suggestion *suggestio
                 else if(!already_exists(suggestions, *suggestion_count, word) && i == (tokenlen - 1) && j == (wordlen - 1) && (tokenlen != wordlen)){
                     add_suggestion(suggestions, suggestion_count, word, differences, index);
                     return;
+                }
+                if(kdot == 1){
+                    i++;
+                    j++;
                 }
             }
             storeJ += offset;
@@ -240,7 +294,6 @@ void find_suggestions(char* token, char* word, int offset, Suggestion *suggestio
             }
             k++;
         }
-        new_differences += abs(tokenlen - wordlen);
         if(!already_exists(suggestions, *suggestion_count, word) && new_differences <= offset){
             add_suggestion(suggestions, suggestion_count, word, new_differences, index);
             return;
@@ -260,7 +313,6 @@ void find_suggestions(char* token, char* word, int offset, Suggestion *suggestio
             }
             k++;
         }
-        new_differences += abs(tokenlen - wordlen);
         if(!already_exists(suggestions, *suggestion_count, word) && new_differences <= offset){
             add_suggestion(suggestions, suggestion_count, word, new_differences, index);
             return;
@@ -435,35 +487,32 @@ void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
 
                 for(int offset = 1; offset <= diffs; offset++){
                     for(int j = 0; j < counter; j++){
-                        if(suggestion_count < alt){
-                            find_suggestions(token, dictionary[j], offset, suggestions, &suggestion_count, alt, j);
-                        }
+                        find_suggestions(token, dictionary[j], offset, suggestions, &suggestion_count, alt, j);
                     }
                 }
+                
                 /*chamada da função que percorre as palavras do fim para o início*/
                 for(int p = 0; p < counter; p++){
-                    if(suggestion_count < alt){
-                        find_suggestions_reversed(token, dictionary[p], diffs, suggestions, &suggestion_count, alt, p);
-                    }
+                    find_suggestions_reversed(token, dictionary[p], diffs, suggestions, &suggestion_count, alt, p);
                 }
 
                 qsort(suggestions, suggestion_count, sizeof(Suggestion), compare_suggestions);
 
-                if(suggestion_count > 0){
-                    for(int i = 0; i < suggestion_count; i++){
-                        if(output(argc, argv) == 1){
-                            fprintf(output_file, "%s", suggestions[i].word);
-                        } 
-                        else{
-                            printf("%s", suggestions[i].word);
-                        }
-                        if(i < (suggestion_count - 1)){
-                            fprintf(output_file, ", ");
-                        }
-                        //printf("Sugestão: %s (Dif: %d, Index: %d)\n", suggestions[i].word, suggestions[i].differences, suggestions[i].index);
+                int print_count = (suggestion_count < alt) ? suggestion_count : alt;
 
-                        free(suggestions[i].word);
+                for(int i = 0; i < print_count; i++){
+                    if(output(argc, argv) == 1){
+                        fprintf(output_file, "%s", suggestions[i].word);
+                    } 
+                    else{
+                        printf("%s", suggestions[i].word);
                     }
+                    if(i < (print_count - 1)){
+                        fprintf(output_file, ", ");
+                    }
+                    //printf("Sugestão: %s (Dif: %d, Index: %d)\n", suggestions[i].word, suggestions[i].differences, suggestions[i].index);
+
+                    free(suggestions[i].word);
                 }
                 free(suggestions);
                 fprintf(output_file, "\n");
