@@ -12,10 +12,10 @@ Erro na palavra "gasogene"
 gasolene, gasoline
 86: of your left shoe, just where the firelight strikes it, the leather is
 Erro na palavra "firelight"
-fire light, firefight, firefight's, firefights, foresight, limelight, sidelight
+fire light, firefight, firefights, foresight, limelight, sidelight
 91: particularly malignant boot-slitting specimen of the London slavey. As
 Erro na palavra "slavey"
-slave y, slave, slaved, slaver, slaves, clayey, Lacey, shave, shaved, shaven
+slave y, slave, slaved, slaver, slavery, slaves, clayey, Lacey, shave, shaved
 93: iodoform, with a black mark of nitrate of silver upon his right
 Erro na palavra "iodoform"
 
@@ -32,7 +32,7 @@ Erro na palavra "Gesellschaft"
 Erro na palavra "Papier"
 Napier, PA pier, panier, paper, rapier, apter, babier, cagier, copier, dapper
 Erro na palavra "Eg"
-Ag, beg, E g, E, ea, EC, Ed, egg, ego, eh
+Ag, beg, E g, E, ea, EC, ECG, Ed, EEG, egg
 169: from his shelves. "Eglow, Eglonitz-here we are, Egria. It is in a
 Erro na palavra "Eglow"
 aglow, E glow, glow, allow, Bellow, below, blow, Eggo, elbow, endow
@@ -82,12 +82,12 @@ Erro na palavra "Felstein"
 Epstein, Holstein
 314: Contralto-hum! La Scala, hum! Prima donna Imperial Opera of Warsaw-yes!
 Erro na palavra "Prima"
-prim, primal, prime, primp, aroma, brim, brims, crime, crimp, drama
+prim a, prim, primal, prime, primp, aroma, brim, brims, crime, crimp
 393: "To Clotilde Lothman von Saxe-Meningen, second daughter of the King of
 Erro na palavra "Clotilde"
 
 Erro na palavra "Lothman"
-
+loth man
 Erro na palavra "von"
 Avon, con, Don, eon, Hon, ion, Jon, Lon, Mon, non
 Erro na palavra "Saxe"
