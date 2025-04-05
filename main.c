@@ -170,11 +170,13 @@ void split(char *word, char **dictionary, int counter, Suggestion *suggestions, 
 }
 
 void find_suggestions(char* token, char* word, int offset, Suggestion *suggestions, int *suggestion_count, int alt, int index){
-    int tokenlen = strlen(token);
-    int wordlen = strlen(word);
+    if(!token || !word || !suggestions || !suggestion_count) return;
+    int tokenlen = token ? strlen(token) : 0;
+    int wordlen = word ? strlen(word) : 0;
     int i = 0, j = 0, happened = 0, differences = 0, storeI = 0, storeJ = 0, storeD = 0, kdot = 0;
-
-    while(tolower(token[i]) == tolower(word[j])){
+    if(tokenlen == 0 || wordlen == 0 || token[0] == '\0' || word[0] == '\0') return;    
+    
+    while(tolower(token[i]) == tolower(word[j]) && i < tokenlen && j < wordlen){
         i++;
         j++;
         if(i == (tokenlen - 1) || j == (wordlen - 1)){
@@ -211,12 +213,12 @@ void find_suggestions(char* token, char* word, int offset, Suggestion *suggestio
 
             i += offset;
             /*aumentar o índice da palavra errada --- token*/
-            while(tolower(token[i]) == tolower(word[j])){
+            while(tolower(token[i]) == tolower(word[j])){  //ERRO
                 if(kdot == 0){
                     i++;
                     j++;
                 }
-                if((tolower(token[i]) != tolower(word[j]))){
+                if(i < tokenlen && j < wordlen && (tolower(token[i]) != tolower(word[j]))){
                     differences++;
                 }
                 if(differences > offset){
@@ -237,10 +239,10 @@ void find_suggestions(char* token, char* word, int offset, Suggestion *suggestio
             }
             storeJ += offset;
             /*aumentar o índice da palavra do dicionário --- word*/
-            while(tolower(token[storeI]) == tolower(word[storeJ])){
+            while(storeI < tokenlen && storeJ < wordlen && tolower(token[storeI]) == tolower(word[storeJ])){
                 storeI++;
                 storeJ++;
-                if((tolower(token[storeI]) != tolower(word[storeJ]))){
+                if(storeI < tokenlen && storeJ < wordlen && (tolower(token[storeI]) != tolower(word[storeJ]))){
                     storeD++;
                 }
                 if(storeD > offset){
@@ -283,7 +285,7 @@ void find_suggestions(char* token, char* word, int offset, Suggestion *suggestio
     /*palavra errada maior que a palavra do dicionário*/
     else if(tokenlen > wordlen){
         while(k < tokenlen){
-            if(tolower(token[i]) == tolower(word[j])){
+            if(i < tokenlen && j < wordlen && tolower(token[i]) == tolower(word[j])){
                 i++;
                 j++;
             }
@@ -300,31 +302,43 @@ void find_suggestions(char* token, char* word, int offset, Suggestion *suggestio
         }
     }
     /*palavra do dicionário maior que a palavra errada*/
-    else{
-        while(k < wordlen){
-            if(tolower(token[i]) == tolower(word[j])){
-                i++;
-                j++;
+    else {
+        k = 0;
+        i = 0;
+        j = 0;
+        new_differences = 0; /*garantir que está inicializado*/
+        
+        while(k < wordlen) {
+            /*verificar limites antes de acessar token[i] e word[j]*/
+            if(i < strlen(token) && j < strlen(word)){
+                if(tolower(token[i]) == tolower(word[j])) {
+                    i++;
+                    j++;
+                }
+                else {
+                    new_differences++;
+                    i++;
+                    j++;
+                }
             }
             else{
                 new_differences++;
-                i++;
-                j++;
             }
             k++;
         }
-        if(!already_exists(suggestions, *suggestion_count, word) && new_differences <= offset){
+        
+        if(!already_exists(suggestions, *suggestion_count, word) && new_differences <= offset) {
             add_suggestion(suggestions, suggestion_count, word, new_differences, index);
             return;
         }
     }
     /*algoritmo para encontrar o centrist*/
     i = 0, j = 0, differences = 0;
-    while(tolower(token[i]) == tolower(word[j])){
+    while(i < tokenlen && j < wordlen && tolower(token[i]) == tolower(word[j])){
         i++;
         j++;
     }
-    while((tolower(token[i]) != tolower(word[j]))){
+    while(i < tokenlen && j < wordlen && (tolower(token[i]) != tolower(word[j]))){
         differences++;
         if(!already_exists(suggestions, *suggestion_count, word) && i == (tokenlen - 1) && (wordlen > tokenlen)){
             differences += abs(tokenlen - wordlen);
@@ -512,6 +526,8 @@ void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
                     }
                     //printf("Sugestão: %s (Dif: %d, Index: %d)\n", suggestions[i].word, suggestions[i].differences, suggestions[i].index);
 
+                }
+                for(int i = 0; i < suggestion_count; i++){
                     free(suggestions[i].word);
                 }
                 free(suggestions);
@@ -522,7 +538,7 @@ void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
     }
 }
 
-/*void mode3(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[], int alt, int diffs){
+/*void mode3(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[], int alt, char *word, int diffs){
 }*/
 
 int main(int argc, char *argv[]){
@@ -616,6 +632,11 @@ int main(int argc, char *argv[]){
             printf("Erro ao alocar memória para a palavra.\n");
             fclose(file);
             return 1;
+            for(int i = 0; i < counter; i++){
+                free(dictionary[i]);
+            }
+        free(dictionary);
+        return 1;
         }
         counter++;
     }
@@ -652,6 +673,5 @@ int main(int argc, char *argv[]){
         free(dictionary[i]);
     }
     free(dictionary);
-
     return 0;
 }
