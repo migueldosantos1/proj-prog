@@ -10,9 +10,9 @@
 #define MAX_LINE 200
 
 typedef struct{
-    char *word;
-    int differences;
-    int index;  /*posição no dicionário*/
+    char *word; /*sugestão*/
+    int differences; /*número de diferenças de cada sugestão*/
+    int index; /*posição no dicionário*/
 } Suggestion;
 
 bool output(int argc, char *argv[]);
