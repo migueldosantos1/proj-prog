@@ -552,40 +552,44 @@ void mode3(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
     char line[MAX_LINE];
     int line_number = 0;
 
-    while(fgets(line, sizeof(line), input_file)){
+    while(fgets(line, sizeof(line), input_file)) {
         line_number++;
         remove_newline(line);
 
         char line_copy[MAX_LINE];
         strcpy(line_copy, line);
 
-        char *tokens[MAX_LINE]; // Array para armazenar todos os tokens da linha
-        char *separators[MAX_LINE]; // Array para armazenar os separadores
+        char *tokens[MAX_LINE];
+        char *separators[MAX_LINE];
         int token_count = 0;
 
-        // Primeiro, dividir a linha em tokens e guardar os separadores
         char *ptr = line_copy;
-        while(*ptr != '\0') {
-            // Encontra o início do token
-            while(*ptr == ' ' || *ptr == '\t' || *ptr == '-') {
+        while (*ptr != '\0') {
+            // Trata pontuação como token separado
+            if (strchr(".,():;\"?!", *ptr) != NULL) {
+                tokens[token_count] = (char *)malloc(2 * sizeof(char));
+                tokens[token_count][0] = *ptr;
+                tokens[token_count][1] = '\0';
+                separators[token_count] = NULL;
+                token_count++;
+                ptr++;
+                continue;
+            }
+
+            while (*ptr == ' ' || *ptr == '\t' || *ptr == '-') {
                 ptr++;
             }
-            if(*ptr == '\0') break;
+            if (*ptr == '\0') break;
 
-            // Encontra o fim do token
             char *token_start = ptr;
-            while(*ptr != '\0' && *ptr != ' ' && *ptr != '\t' && *ptr != '-') {
+            while (*ptr != '\0' && *ptr != ' ' && *ptr != '\t' && *ptr != '-' && strchr(".,():;?!", *ptr) == NULL) {
                 ptr++;
             }
 
-            // Armazena o separador (pode ser espaço, tab ou hífen)
-            if(*ptr != '\0') {
-                separators[token_count] = (char *)malloc(4 * sizeof(char));
+            if (*ptr != '\0') {
+                separators[token_count] = (char *)malloc(2 * sizeof(char));
                 separators[token_count][0] = *ptr;
                 separators[token_count][1] = '\0';
-                //separators[token_count][2] = '.';
-                //separators[token_count][3] = ',';
-                //separators[token_count][4] = "'";
                 ptr++;
             } else {
                 separators[token_count] = NULL;
@@ -593,15 +597,21 @@ void mode3(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
 
             // Extrai o token
             int token_len = ptr - token_start;
-            tokens[token_count] = (char *)malloc((token_len + 1) * sizeof(char));
-            strncpy(tokens[token_count], token_start, token_len);
-            tokens[token_count][token_len] = '\0';
-
-            token_count++;
+            if (token_len > 0) {
+                tokens[token_count] = (char *)malloc((token_len + 1) * sizeof(char));
+                strncpy(tokens[token_count], token_start, token_len);
+                tokens[token_count][token_len] = '\0';
+                token_count++;
+            }
         }
 
-        // Processa cada token
+        // Processa cada token (exceto pontuação)
         for(int i = 0; i < token_count; i++) {
+            // Ignora tokens que são apenas pontuação
+            if(strlen(tokens[i]) == 1 && strchr(".,():;\"?!", tokens[i][0])) {
+                continue;
+            }
+
             char original_token[MAX_WORD];
             strcpy(original_token, tokens[i]);
             clean_word(tokens[i]);
@@ -610,7 +620,6 @@ void mode3(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
                 Suggestion *suggestions = (Suggestion *)malloc(alt * MAX_WORD * sizeof(Suggestion));
                 int suggestion_count = 0;
 
-                // Busca sugestões como no modo 2
                 split(tokens[i], dictionary, counter, suggestions, &suggestion_count, diffs, alt);
 
                 for(int offset = 1; offset <= diffs; offset++) {
@@ -625,13 +634,11 @@ void mode3(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
 
                 qsort(suggestions, suggestion_count, sizeof(Suggestion), compare_suggestions);
 
-                // Se houver sugestões, substitui o token pela primeira sugestão
                 if(suggestion_count > 0) {
                     free(tokens[i]);
                     tokens[i] = strdup(suggestions[0].word);
                 }
 
-                // Libera memória das sugestões
                 for(int k = 0; k < suggestion_count; k++) {
                     free(suggestions[k].word);
                 }
@@ -639,30 +646,55 @@ void mode3(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
             }
         }
 
-        // Reconstrói a linha com os tokens modificados
-        for(int i = 0; i < token_count; i++){
-            if(output(argc, argv) == 1) {
+        int quote_open = 0; // 0 -> próxima aspa é de abertura, 1 -> próxima é de fecho
+        // Imprime os tokens
+        for (int i = 0; i < token_count; i++) {
+            if (output(argc, argv) == 1) {
                 fprintf(output_file, "%s", tokens[i]);
             } else {
                 printf("%s", tokens[i]);
             }
-
+        
             // Adiciona o separador, exceto após o último token
-            if(i < token_count - 1 && separators[i] != NULL) {
-                if(output(argc, argv) == 1) {
-                    fprintf(output_file, "%s", separators[i]);
+            if (i < token_count && separators[i] != NULL) {
+                char current_sep = separators[i][0];
+                char next_char = (i + 1 < token_count && tokens[i + 1][0]) ? tokens[i + 1][0] : '\0';
+                char prev_token_last_char = (i > 0 && tokens[i-1]) ? tokens[i-1][strlen(tokens[i-1])-1] : '\0';
+        
+                if (output(argc, argv) == 1) {
+                    fprintf(output_file, "%c", current_sep);
                 } else {
-                    printf("%s", separators[i]);
+                    printf("%c", current_sep);
+                }
+        
+                // GESTÃO DAS ASPAS
+                if (current_sep == '"') {
+                    if (quote_open) {
+                        if (output(argc, argv) == 1) fprintf(output_file, " ");
+                        else printf(" ");
+                        quote_open = 0;
+                    } else {
+                        if (prev_token_last_char == '.' || prev_token_last_char == '!' || prev_token_last_char == '?') {
+                            if (output(argc, argv) == 1) fprintf(output_file, " ");
+                            else printf(" ");
+                        }
+                        quote_open = 1;
+                    }
+                } 
+                else if ((current_sep == '.' || current_sep == ',' || current_sep == '?' || current_sep == '!' || current_sep == ';' || current_sep == ':') && next_char != '"' && next_char != '.') {
+                    if (output(argc, argv) == 1) fprintf(output_file, " ");
+                    else printf(" ");
                 }
             }
-
+        
             free(tokens[i]);
-            if(separators[i] != NULL) {
+            if (separators[i] != NULL) {
                 free(separators[i]);
             }
         }
-
-        if(output(argc, argv) == 1) {
+        
+        // APENAS AQUI imprimes a quebra de linha final da linha original
+        if (output(argc, argv) == 1) {
             fprintf(output_file, "\n");
         } else {
             printf("\n");
