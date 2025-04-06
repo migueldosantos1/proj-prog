@@ -178,100 +178,102 @@ void find_suggestions(FILE *input_file, FILE *output_file, char* token, char* wo
     if(!token || !word || !suggestions || !suggestion_count) return;
     int tokenlen = token ? strlen(token) : 0;
     int wordlen = word ? strlen(word) : 0;
-    int i = 0, j = 0, happened = 0, differences = 0, storeI = 0, storeJ = 0, storeD = 0, kdot = 0;
+    int i = 0, j = 0, happened = 0, differences = 0, flag = 0;
     if(tokenlen == 0 || wordlen == 0 || token[0] == '\0' || word[0] == '\0') return;
     
-    while(tolower(token[i]) == tolower(word[j]) && i < tokenlen && j < wordlen){
-        i++;
-        j++;
-        if(i == (tokenlen - 1) || j == (wordlen - 1)){
-            kdot = 1;
-            continue;
+    /*---------------------------------------------------------------------------------CONSIDERA-OFFSET-------------------------------------------------------------------------------------------------*/
+    if(tokenlen > wordlen){
+        for(int p = 0; p < tokenlen; p++){
+            if((tolower(token[i]) == tolower(word[j])) && i < tokenlen && j < wordlen){
+                if(i == tokenlen && j == wordlen){
+                    continue;
+                }
+                i++;
+                j++;
+                flag = 1;
+            }
+            else if((tolower(token[i]) != tolower(word[j])) && happened == 1 && i < tokenlen && j < wordlen){
+                differences++;
+                if(i == tokenlen && j == wordlen){
+                    continue;
+                }
+                i++;
+                j++;
+                if(flag == 1){
+                    p++;
+                }
+            }
+            else if((tolower(token[i]) != tolower(word[j])) && happened == 0 && i < tokenlen && j < wordlen){
+                differences++;
+                if(i == tokenlen && j == wordlen){
+                    continue;
+                }
+                happened = 1;
+                /*averigurar se a diferenças entre os comprimentos das palavras é maior que 1, se sim, incrementa 1*/
+                for(int l = i + 1; l < i + offset; l++){
+                    if((tolower(token[l]) != tolower(word[j])) || abs(tokenlen - wordlen) > 1){
+                        differences++;
+                    }
+                }
+                i += offset;
+                if(flag == 1){
+                    p++;
+                }
+            }
+            flag = 0;
         }
-    }
-    /*para encontrar o cent --- j == wordlen pq já sai do ciclo acima com os índices incrementados, não contabilizando a fim das palavras*/
-    if(i != (tokenlen - 1) && j == (wordlen) && (tokenlen != wordlen)){
-        differences += abs(tokenlen - wordlen);
-        if(!already_exists(suggestions, *suggestion_count, word) && (differences <= offset)){
+        if(!already_exists(suggestions, *suggestion_count, word) && differences <= offset && i == tokenlen && j == wordlen){
             add_suggestion(suggestions, suggestion_count, word, differences, index);
             return;
         }
     }
-    while(1){
-        if((tolower(token[i]) != tolower(word[j]))){
-            differences++;
-            if(happened == 1){
-                break;
-            }
-            /*guarda os índices do i e do j e das diferenças na primeira letra errada*/
-            storeI = i;
-            storeJ = j;
-            storeD = differences;
-
-            /*averigurar se a diferenças entre os comprimentos das palavras é maior que 1, se sim, incrementa 1*/
-            for(int l = i + 1; l < i + offset; l++){
-                if((tolower(token[l]) != tolower(word[j])) && abs(tokenlen - wordlen) > 1){
-                    differences++;
-                    storeD++;
-                }
-            }
-
-            i += offset;
-            /*aumentar o índice da palavra errada --- token*/
-            while(tolower(token[i]) == tolower(word[j])){  //ERRO
-                if(kdot == 0){
-                    i++;
-                    j++;
-                }
-                if(i < tokenlen && j < wordlen && (tolower(token[i]) != tolower(word[j]))){
-                    differences++;
-                }
-                if(differences > offset){
+    if(wordlen > tokenlen){
+        for(int p = 0; p < wordlen; p++){
+            if((tolower(token[i]) == tolower(word[j])) && i < tokenlen && j < wordlen){
+                if(i == tokenlen && j == wordlen){
                     continue;
                 }
-                if(!already_exists(suggestions, *suggestion_count, word) && i == (tokenlen - 1) && j == (wordlen - 1) && (tokenlen == wordlen) && (differences <= offset)){
-                    add_suggestion(suggestions, suggestion_count, word, differences, index);
-                    return;
-                }
-                else if(!already_exists(suggestions, *suggestion_count, word) && i == (tokenlen - 1) && j == (wordlen - 1) && (tokenlen != wordlen)){
-                    add_suggestion(suggestions, suggestion_count, word, differences, index);
-                    return;
-                }
-                if(kdot == 1){
-                    i++;
-                    j++;
-                }
+                i++;
+                j++;
+                flag = 1;
             }
-            storeJ += offset;
-            /*aumentar o índice da palavra do dicionário --- word*/
-            while(storeI < tokenlen && storeJ < wordlen && tolower(token[storeI]) == tolower(word[storeJ])){
-                if(kdot == 0){
-                    storeI++;
-                    storeJ++;
-                }
-                if(storeI < tokenlen && storeJ < wordlen && (tolower(token[storeI]) != tolower(word[storeJ]))){
-                    storeD++;
-                }
-                if(storeD > offset){
+            else if((tolower(token[i]) != tolower(word[j])) && happened == 1 && i < tokenlen && j < wordlen){
+                differences++;
+                if(i == tokenlen && j == wordlen){
                     continue;
                 }
-                if(!already_exists(suggestions, *suggestion_count, word) && storeI == (tokenlen - 1) && storeJ == (wordlen - 1) && (tokenlen == wordlen) && (storeD <= offset)){
-                    add_suggestion(suggestions, suggestion_count, word, storeD, index);
-                    return;
-                }
-                else if(!already_exists(suggestions, *suggestion_count, word) && storeI == (tokenlen - 1) && storeJ == (wordlen - 1) && (tokenlen != wordlen)){
-                    add_suggestion(suggestions, suggestion_count, word, storeD, index);
-                    return;
-                }
-                if(kdot == 1){
-                    storeI++;
-                    storeJ++;
+                i++;
+                j++;
+                if(flag == 1){
+                    p++;
                 }
             }
-            happened = 1;
+            else if((tolower(token[i]) != tolower(word[j])) && happened == 0 && i < tokenlen && j < wordlen){
+                differences++;
+                if(i == tokenlen && j == wordlen){
+                    continue;
+                }
+                happened = 1;
+                /*averigurar se a diferenças entre os comprimentos das palavras é maior que 1, se sim, incrementa 1*/
+                for(int l = i + 1; l < i + offset; l++){
+                    if((tolower(token[l]) != tolower(word[j])) || abs(tokenlen - wordlen) > 1){
+                        differences++;
+                    }
+                }
+                j += offset;
+                if(flag == 1){
+                    p++;
+                }
+            }
+            flag = 0;
         }
-        continue;
+        if(!already_exists(suggestions, *suggestion_count, word) && differences <= offset && i == tokenlen && j == wordlen){
+            add_suggestion(suggestions, suggestion_count, word, differences, index);
+            return;
+        }
     }
+
+    /*----------------------------------------------------------------------------------NÃO-CONSIDERA-OFFSET-------------------------------------------------------------------------------------------*/
     /*reset às variáveis*/
     int new_differences = 0, k = 0;
     i = 0, j = 0;
@@ -315,13 +317,10 @@ void find_suggestions(FILE *input_file, FILE *output_file, char* token, char* wo
     }
     /*palavra do dicionário maior que a palavra errada*/
     else{
-        k = 0;
-        i = 0;
-        j = 0;
-        new_differences = 0; /*garantir que está inicializado*/
+        k = 0, i = 0, j = 0, new_differences = 0; /*garantir que está inicializado*/
         
-        while(k < wordlen) {
-            /*verificar limites antes de acessar token[i] e word[j]*/
+        while(k < wordlen){
+            /*verificar limites antes de aceder a token[i] e word[j]*/
             if(i < strlen(token) && j < strlen(word)){
                 if(tolower(token[i]) == tolower(word[j])){
                     i++;
@@ -344,7 +343,7 @@ void find_suggestions(FILE *input_file, FILE *output_file, char* token, char* wo
         }
     }
     /*algoritmo para encontrar o centrist*/
-    i = 0, j = 0, differences = 0;
+    /*i = 0, j = 0, differences = 0;
     while(i < tokenlen && j < wordlen && tolower(token[i]) == tolower(word[j])){
         i++;
         j++;
@@ -360,7 +359,7 @@ void find_suggestions(FILE *input_file, FILE *output_file, char* token, char* wo
         }
         i++;
         j++;
-    }
+    }*/
 }
 
 void find_suggestions_reversed(FILE *input_file, FILE *output_file, char* token, char* word, int offset, Suggestion *suggestions, int *suggestion_count, int alt, int index){
