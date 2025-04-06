@@ -401,7 +401,7 @@ void find_suggestions_reversed(char* token, char* word, int offset, Suggestion *
         }
         differences += abs(tokenlen - wordlen);
         /*apenas encontra uma palavra alternativa se o número de diferenças de que andamos à procura for igual ao valor especificado na linha de comandos*/
-        if(!already_exists(suggestions, *suggestion_count, word) && differences == offset){
+        if(!already_exists(suggestions, *suggestion_count, word) && differences == offset){ /*para resolver a cena das 3 diferenças com o enured é só pôr <= em vez de ==, mas não é o que o enunciado diz*/
             add_suggestion(suggestions, suggestion_count, word, differences, index);
             return;
         }
@@ -548,8 +548,82 @@ void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
     }
 }
 
-/*void mode3(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[], int alt, char *word, int diffs){
-}*/
+void mode3(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[], int alt, int diffs){
+    char line[MAX_LINE];
+    rewind(input_file);
+
+    while(fgets(line, sizeof(line), input_file)){
+        remove_newline(line);
+        char line_copy[MAX_LINE];
+        strcpy(line_copy, line);
+
+        char *token = strtok(line, " \t-");
+        int first_word = 1;
+
+        while(token != NULL) {
+            char original_token[MAX_WORD];
+            strcpy(original_token, token);
+            clean_word(token);
+
+            if(!(strspn(token, "0123456789") == strlen(token))) {
+                if(!binary_search(token, dictionary, counter)){
+                    // Palavra com erro - encontrar sugestões
+                    Suggestion *suggestions = (Suggestion *)malloc(alt * MAX_WORD * sizeof(Suggestion));
+                    int suggestion_count = 0;
+
+                    split(token, dictionary, counter, suggestions, &suggestion_count, diffs, alt);
+
+                    for(int offset = 1; offset <= diffs; offset++) {
+                        for(int j = 0; j < counter; j++) {
+                            find_suggestions(token, dictionary[j], offset, suggestions, &suggestion_count, alt, j);
+                        }
+                    }
+
+                    for(int p = 0; p < counter; p++) {
+                        find_suggestions_reversed(token, dictionary[p], diffs, suggestions, &suggestion_count, alt, p);
+                    }
+
+                    qsort(suggestions, suggestion_count, sizeof(Suggestion), compare_suggestions);
+
+                    // Se houver sugestões, usar a primeira
+                    if(suggestion_count > 0) {
+                        if(!first_word) {
+                            fprintf(output_file, " ");
+                        }
+                        fprintf(output_file, "%s", suggestions[0].word);
+                    } else {
+                        // Se não houver sugestões, manter a palavra original
+                        if(!first_word) {
+                            fprintf(output_file, " ");
+                        }
+                        fprintf(output_file, "%s", original_token);
+                    }
+
+                    for(int i = 0; i < suggestion_count; i++) {
+                        free(suggestions[i].word);
+                    }
+                    free(suggestions);
+                } else {
+                    // Palavra correta - manter como está
+                    if(!first_word) {
+                        fprintf(output_file, " ");
+                    }
+                    fprintf(output_file, "%s", original_token);
+                }
+            } else {
+                // Números - manter como está
+                if(!first_word) {
+                    fprintf(output_file, " ");
+                }
+                fprintf(output_file, "%s", original_token);
+            }
+
+            token = strtok(NULL, " \t-");
+            first_word = 0;
+        }
+        fprintf(output_file, "\n");
+    }
+}
 
 int main(int argc, char *argv[]){
     char *dictionary_filename = NULL;
@@ -561,6 +635,7 @@ int main(int argc, char *argv[]){
     int alt = 10; /*por omissão, o número máximo de alternativas a mostrar é definido a 10*/
     int diffs = 2; /*por omissão, o número máximo de diferenças a considerar é definido a 2*/
     int mode = 1; /*por omissão, o modo de funcionamento é definido como 1*/
+    int flag = 0; /*flag*/
 
     for(int i = 1; i < argc; i++){
         if(strcmp(argv[i], "-h") == 0){
@@ -585,12 +660,18 @@ int main(int argc, char *argv[]){
         }
         else if(strcmp(argv[i], "-m") == 0 && i + 1 < argc){
             mode = atoi(argv[++i]);
+            flag = 1;
         }
     }
 
     if(dictionary_filename == NULL){
-        printf("Nenhum dicionário introduzido.\n");
-        return 1;
+        dictionary_filename = "words";
+    }
+
+    if(flag == 0){
+        if(argc > 1){
+            mode = atoi(argv[1]);
+        }
     }
 
     /*caso o input file seja atribuído, abre o ficheiro fornecido*/
@@ -611,7 +692,7 @@ int main(int argc, char *argv[]){
         }
     }
 
-    FILE *file = fopen(argv[2], "r");
+    FILE *file = fopen(dictionary_filename, "r");
     if(file == NULL){
         printf("Erro ao abrir o dicionário.\n");
         return 1;
@@ -631,7 +712,7 @@ int main(int argc, char *argv[]){
     char word[MAX_WORD]; /*buffer temporário para armazenar as palavras*/
     int counter = 0;
 
-    while(fscanf(file, "%s", word) == 1){  
+    while(fscanf(file, "%s", word) == 1){
         /*parar de ler a palavra ao encontrar espaço, tab, mudança de linha, ou o caracter '/'*/
         if(strchr(word, (' ' || '\t' || '\n' || '/' || '-')) != NULL){
             continue;
@@ -641,12 +722,11 @@ int main(int argc, char *argv[]){
         if(dictionary[counter] == NULL){
             printf("Erro ao alocar memória para a palavra.\n");
             fclose(file);
-            return 1;
             for(int i = 0; i < counter; i++){
                 free(dictionary[i]);
             }
-        free(dictionary);
-        return 1;
+            free(dictionary);
+            return 1;
         }
         counter++;
     }
@@ -661,12 +741,18 @@ int main(int argc, char *argv[]){
     else if(mode == 2){
         mode2(input_file, output_file, dictionary, counter, argc, argv, alt, word, diffs);
     }
-    /*else if(mode == 3){
+    else if(mode == 3){
         mode3(input_file, output_file, dictionary, counter, argc, argv, alt, diffs);
-    }*/
+    }
     else{
         printf("Modo inválido.\n");
     }
+
+    /*free da memória alocada*/
+    for(int i = 0; i < counter; i++){
+        free(dictionary[i]);
+    }
+    free(dictionary);
 
     /*se "-i" e "-o" não forem emitidos, fecha os ficheiros fornecidos*/
     if(input_file != stdin){
@@ -678,10 +764,5 @@ int main(int argc, char *argv[]){
 
     fclose(file);
 
-    /*free da memória alocada*/
-    for(int i = 0; i < counter; i++){
-        free(dictionary[i]);
-    }
-    free(dictionary);
     return 0;
 }

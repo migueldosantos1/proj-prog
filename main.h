@@ -7,12 +7,12 @@
 #include <stdbool.h>
 #include <ctype.h>
 #define MAX_WORD 100
-#define MAX_LINE 100
+#define MAX_LINE 200
 
-typedef struct {
-char *word;
-int differences;
-int index;  /*posição no dicionário*/
+typedef struct{
+    char *word;
+    int differences;
+    int index;  /*posição no dicionário*/
 } Suggestion;
 
 bool output(int argc, char *argv[]);
@@ -41,6 +41,6 @@ void mode1(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
 
 void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[], int alt, char *word, int diffs);
 
-//void mode3(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[], int alt, int diffs);
+void mode3(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[], int alt, int diffs);
 
 #endif
