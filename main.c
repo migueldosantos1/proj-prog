@@ -174,7 +174,7 @@ void split(char *word, char **dictionary, int counter, Suggestion *suggestions, 
     }
 }
 
-void find_suggestions(char* token, char* word, int offset, Suggestion *suggestions, int *suggestion_count, int alt, int index){
+void find_suggestions(FILE *input_file, FILE *output_file, char* token, char* word, int offset, Suggestion *suggestions, int *suggestion_count, int alt, int index){
     if(!token || !word || !suggestions || !suggestion_count) return;
     int tokenlen = token ? strlen(token) : 0;
     int wordlen = word ? strlen(word) : 0;
@@ -270,6 +270,7 @@ void find_suggestions(char* token, char* word, int offset, Suggestion *suggestio
             }
             happened = 1;
         }
+        continue;
     }
     /*reset às variáveis*/
     int new_differences = 0, k = 0;
@@ -362,7 +363,7 @@ void find_suggestions(char* token, char* word, int offset, Suggestion *suggestio
     }
 }
 
-void find_suggestions_reversed(char* token, char* word, int offset, Suggestion *suggestions, int *suggestion_count, int alt, int index){
+void find_suggestions_reversed(FILE *input_file, FILE *output_file, char* token, char* word, int offset, Suggestion *suggestions, int *suggestion_count, int alt, int index){
     int tokenlen = strlen(token);
     int wordlen = strlen(word);
     int i = (tokenlen - 1), j = (wordlen - 1), differences = 0;
@@ -511,13 +512,13 @@ void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
 
                 for(int offset = 1; offset <= diffs; offset++){
                     for(int j = 0; j < counter; j++){
-                        find_suggestions(token, dictionary[j], offset, suggestions, &suggestion_count, alt, j);
+                        find_suggestions(input_file, output_file, token, dictionary[j], offset, suggestions, &suggestion_count, alt, j);
                     }
                 }
                 
                 /*chamada da função que percorre as palavras do fim para o início*/
                 for(int p = 0; p < counter; p++){
-                    find_suggestions_reversed(token, dictionary[p], diffs, suggestions, &suggestion_count, alt, p);
+                    find_suggestions_reversed(input_file, output_file, token, dictionary[p], diffs, suggestions, &suggestion_count, alt, p);
                 }
 
                 qsort(suggestions, suggestion_count, sizeof(Suggestion), compare_suggestions);
@@ -532,7 +533,12 @@ void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
                         printf("%s", suggestions[i].word);
                     }
                     if(i < (print_count - 1)){
-                        fprintf(output_file, ", ");
+                        if(output(argc, argv) == 1){
+                            fprintf(output_file, ", ");
+                        } 
+                        else{
+                            printf(", ");
+                        }
                     }
                     //printf("Sugestão: %s (Dif: %d, Index: %d)\n", suggestions[i].word, suggestions[i].differences, suggestions[i].index);
 
@@ -624,12 +630,12 @@ void mode3(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
 
                 for(int offset = 1; offset <= diffs; offset++) {
                     for(int j = 0; j < counter; j++) {
-                        find_suggestions(tokens[i], dictionary[j], offset, suggestions, &suggestion_count, alt, j);
+                        find_suggestions(input_file, output_file, tokens[i], dictionary[j], offset, suggestions, &suggestion_count, alt, j);
                     }
                 }
 
                 for(int p = 0; p < counter; p++) {
-                    find_suggestions_reversed(tokens[i], dictionary[p], diffs, suggestions, &suggestion_count, alt, p);
+                    find_suggestions_reversed(input_file, output_file, tokens[i], dictionary[p], diffs, suggestions, &suggestion_count, alt, p);
                 }
 
                 qsort(suggestions, suggestion_count, sizeof(Suggestion), compare_suggestions);

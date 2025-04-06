@@ -6,7 +6,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <ctype.h>
-#define MAX_WORD 100
+#define MAX_WORD 200
 #define MAX_LINE 200
 
 typedef struct{
@@ -33,9 +33,9 @@ void print_help();
 
 void split(char *word, char **dictionary, int counter, Suggestion *suggestions, int *suggestion_count, int offset, int alt);
 
-void find_suggestions(char* token, char* word, int offset, Suggestion *suggestions, int *suggestion_count, int alt, int index);
+void find_suggestions(FILE *input_file, FILE *output_file, char* token, char* word, int offset, Suggestion *suggestions, int *suggestion_count, int alt, int index);
 
-void find_suggestions_reversed(char* token, char* word, int offset, Suggestion *suggestions, int *suggestion_count, int alt, int index);
+void find_suggestions_reversed(FILE *input_file, FILE *output_file, char* token, char* word, int offset, Suggestion *suggestions, int *suggestion_count, int alt, int index);
 
 void mode1(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[]);
 

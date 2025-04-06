@@ -1,90 +1,18 @@
-1: The Project Gutenberg eBook of Alice's Adventures in Wonderland
-Erro na palavra "eBook"
-book, E book, betook, boob, boom, boon, boor, boos, boot, Bork
-3: This ebook is for the use of anyone anywhere in the United States and
-Erro na palavra "ebook"
-book, E book, betook, boob, boom, boon, boor, boos, boot, Bork
-6: of the Project Gutenberg License included with this ebook or online
-Erro na palavra "ebook"
-book, E book, betook, boob, boom, boon, boor, boos, boot, Bork
-7: at www.gutenberg.org. If you are not located in the United States,
-Erro na palavra "wwwgutenbergorg"
-
-9: before using this eBook.
-Erro na palavra "eBook"
-book, E book, betook, boob, boom, boon, boor, boos, boot, Bork
-16: Release date: June 27, 2008 [eBook #11]
-Erro na palavra "eBook"
-book, E book, betook, boob, boom, boon, boor, boos, boot, Bork
-21: Credits: Arthur DiBianca and David Widger
-Erro na palavra "DiBianca"
-Di Bianca, Bianca
-Erro na palavra "Widger"
-wider, widget, winger, badger, bidder, bigger, Bridger, cadger, codger, digger
-24: *** START OF THE PROJECT GUTENBERG EBOOK ALICE'S ADVENTURES IN WONDERLAND ***
-Erro na palavra "EBOOK"
-book, E book, betook, boob, boom, boon, boor, boos, boot, Bork
-109: getting somewhere near the centre of the earth. Let me see: that would
-Erro na palavra "centre"
-cent re, cent, cent's, center, central, cents, entry, enure, gentle, Gentry
-131: talking again. "Dinah'll miss me very much to-night, I should think!"
-Erro na palavra "Dinah'll"
-Dinah's
-204: flavour of cherry-tart, custard, pine-apple, roast turkey, toffee, and
-Erro na palavra "flavour"
-flavor, Cavour, flavorful, flavors, flour, glamour
-277: "Curiouser and curiouser!" cried Alice (she was so much surprised, that
-Erro na palavra "Curiouser"
-curio user, curious, curiously
-Erro na palavra "curiouser"
-curio user, curious, curiously
-293:      Alice's Right Foot, Esq., Hearthrug, near the Fender, (with
-Erro na palavra "Hearthrug"
-hearth rug
-321: the fan, and skurried away into the darkness as hard as he could go.
-Erro na palavra "skurried"
-scurried, curried, flurried, hurried, scurries
-421: "Perhaps it doesn't understand English," thought Alice; "I daresay it's
-Erro na palavra "daresay"
-Dare say, dares ay, dares
-424: anything had happened.) So she began again: "Ou est ma chatte?" which
-Erro na palavra "Ou"
-Au, Cu, Eu, IOU, Lou, Lu, mu, nu, O u, O
-Erro na palavra "chatte"
-chaste, chatted, chattel, chatter, chatty, chaise, Chance, change, chant, chanted
-472: Dodo, a Lory and an Eaglet, and several other curious creatures. Alice
-Erro na palavra "Lory"
-Cory, dory, Flory, glory, gory, Kory, Lora, Lord, lore, Lori
-483: birds with draggled feathers, the animals with their fur clinging close
-Erro na palavra "draggled"
-dragged, bedraggled, haggled, straggled, waggled, wrangled, wriggled
-490: with the Lory, who at last turned sulky, and would only say, "I am
-Erro na palavra "Lory"
-Cory, dory, Flory, glory, gory, Kory, Lora, Lord, lore, Lori
-492: without knowing how old it was, and, as the Lory positively refused to
-Erro na palavra "Lory"
-Cory, dory, Flory, glory, gory, Kory, Lora, Lord, lore, Lori
-503: the Conqueror, whose cause was favoured by the pope, was soon submitted
-Erro na palavra "favoured"
-favored, devoured
-505: accustomed to usurpation and conquest. Edwin and Morcar, the earls of
-Erro na palavra "Morcar"
-mortar, boxcar, Dorcas, Mercer, Molnar, Morgan, mortal, mortars, motorcar, Oscar
-506: Mercia and Northumbria-'"
+1: Mercia and Northumbria-'"
 Erro na palavra "Northumbria"
 
-508: "Ugh!" said the Lory, with a shiver.
+2: "Ugh!" said the Lory, with a shiver.
 Erro na palavra "Lory"
 Cory, dory, Flory, glory, gory, Kory, Lora, Lord, lore, Lori
-513: "Not I!" said the Lory hastily.
+3: "Not I!" said the Lory hastily.
 Erro na palavra "Lory"
 Cory, dory, Flory, glory, gory, Kory, Lora, Lord, lore, Lori
-515: "I thought you did," said the Mouse. "-I proceed. 'Edwin and Morcar,
+4: "I thought you did," said the Mouse. "-I proceed. 'Edwin and Morcar,
 Erro na palavra "Morcar"
 mortar, boxcar, Dorcas, Mercer, Molnar, Morgan, mortal, mortars, motorcar, Oscar
-516: the earls of Mercia and Northumbria, declared for him: and even
+5: he earls of Mercia and Northumbria, declared for him: and even
 Erro na palavra "Northumbria"
 
-517: Stigand, the patriotic archbishop of Canterbury, found it advisable-'"
+6: Stigand, the patriotic archbishop of Canterbury, found it advisable-'"
 Erro na palavra "Stigand"
-b
+brigand, stand, stipend
