@@ -548,80 +548,125 @@ void mode2(FILE *input_file, FILE *output_file, char **dictionary, int counter, 
     }
 }
 
-void mode3(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[], int alt, int diffs){
+void mode3(FILE *input_file, FILE *output_file, char **dictionary, int counter, int argc, char *argv[], int alt, int diffs) {
     char line[MAX_LINE];
-    rewind(input_file);
+    int line_number = 0;
 
     while(fgets(line, sizeof(line), input_file)){
+        line_number++;
         remove_newline(line);
+
         char line_copy[MAX_LINE];
         strcpy(line_copy, line);
 
-        char *token = strtok(line, " \t-");
-        int first_word = 1;
+        char *tokens[MAX_LINE]; // Array para armazenar todos os tokens da linha
+        char *separators[MAX_LINE]; // Array para armazenar os separadores
+        int token_count = 0;
 
-        while(token != NULL) {
-            char original_token[MAX_WORD];
-            strcpy(original_token, token);
-            clean_word(token);
+        // Primeiro, dividir a linha em tokens e guardar os separadores
+        char *ptr = line_copy;
+        while(*ptr != '\0') {
+            // Encontra o início do token
+            while(*ptr == ' ' || *ptr == '\t' || *ptr == '-') {
+                ptr++;
+            }
+            if(*ptr == '\0') break;
 
-            if(!(strspn(token, "0123456789") == strlen(token))) {
-                if(!binary_search(token, dictionary, counter)){
-                    // Palavra com erro - encontrar sugestões
-                    Suggestion *suggestions = (Suggestion *)malloc(alt * MAX_WORD * sizeof(Suggestion));
-                    int suggestion_count = 0;
-
-                    split(token, dictionary, counter, suggestions, &suggestion_count, diffs, alt);
-
-                    for(int offset = 1; offset <= diffs; offset++) {
-                        for(int j = 0; j < counter; j++) {
-                            find_suggestions(token, dictionary[j], offset, suggestions, &suggestion_count, alt, j);
-                        }
-                    }
-
-                    for(int p = 0; p < counter; p++) {
-                        find_suggestions_reversed(token, dictionary[p], diffs, suggestions, &suggestion_count, alt, p);
-                    }
-
-                    qsort(suggestions, suggestion_count, sizeof(Suggestion), compare_suggestions);
-
-                    // Se houver sugestões, usar a primeira
-                    if(suggestion_count > 0) {
-                        if(!first_word) {
-                            fprintf(output_file, " ");
-                        }
-                        fprintf(output_file, "%s", suggestions[0].word);
-                    } else {
-                        // Se não houver sugestões, manter a palavra original
-                        if(!first_word) {
-                            fprintf(output_file, " ");
-                        }
-                        fprintf(output_file, "%s", original_token);
-                    }
-
-                    for(int i = 0; i < suggestion_count; i++) {
-                        free(suggestions[i].word);
-                    }
-                    free(suggestions);
-                } else {
-                    // Palavra correta - manter como está
-                    if(!first_word) {
-                        fprintf(output_file, " ");
-                    }
-                    fprintf(output_file, "%s", original_token);
-                }
-            } else {
-                // Números - manter como está
-                if(!first_word) {
-                    fprintf(output_file, " ");
-                }
-                fprintf(output_file, "%s", original_token);
+            // Encontra o fim do token
+            char *token_start = ptr;
+            while(*ptr != '\0' && *ptr != ' ' && *ptr != '\t' && *ptr != '-') {
+                ptr++;
             }
 
-            token = strtok(NULL, " \t-");
-            first_word = 0;
+            // Armazena o separador (pode ser espaço, tab ou hífen)
+            if(*ptr != '\0') {
+                separators[token_count] = (char *)malloc(4 * sizeof(char));
+                separators[token_count][0] = *ptr;
+                separators[token_count][1] = '\0';
+                //separators[token_count][2] = '.';
+                //separators[token_count][3] = ',';
+                //separators[token_count][4] = "'";
+                ptr++;
+            } else {
+                separators[token_count] = NULL;
+            }
+
+            // Extrai o token
+            int token_len = ptr - token_start;
+            tokens[token_count] = (char *)malloc((token_len + 1) * sizeof(char));
+            strncpy(tokens[token_count], token_start, token_len);
+            tokens[token_count][token_len] = '\0';
+
+            token_count++;
         }
-        fprintf(output_file, "\n");
+
+        // Processa cada token
+        for(int i = 0; i < token_count; i++) {
+            char original_token[MAX_WORD];
+            strcpy(original_token, tokens[i]);
+            clean_word(tokens[i]);
+
+            if(!(strspn(tokens[i], "0123456789") == strlen(tokens[i])) && !binary_search(tokens[i], dictionary, counter)) {
+                Suggestion *suggestions = (Suggestion *)malloc(alt * MAX_WORD * sizeof(Suggestion));
+                int suggestion_count = 0;
+
+                // Busca sugestões como no modo 2
+                split(tokens[i], dictionary, counter, suggestions, &suggestion_count, diffs, alt);
+
+                for(int offset = 1; offset <= diffs; offset++) {
+                    for(int j = 0; j < counter; j++) {
+                        find_suggestions(tokens[i], dictionary[j], offset, suggestions, &suggestion_count, alt, j);
+                    }
+                }
+
+                for(int p = 0; p < counter; p++) {
+                    find_suggestions_reversed(tokens[i], dictionary[p], diffs, suggestions, &suggestion_count, alt, p);
+                }
+
+                qsort(suggestions, suggestion_count, sizeof(Suggestion), compare_suggestions);
+
+                // Se houver sugestões, substitui o token pela primeira sugestão
+                if(suggestion_count > 0) {
+                    free(tokens[i]);
+                    tokens[i] = strdup(suggestions[0].word);
+                }
+
+                // Libera memória das sugestões
+                for(int k = 0; k < suggestion_count; k++) {
+                    free(suggestions[k].word);
+                }
+                free(suggestions);
+            }
+        }
+
+        // Reconstrói a linha com os tokens modificados
+        for(int i = 0; i < token_count; i++){
+            if(output(argc, argv) == 1) {
+                fprintf(output_file, "%s", tokens[i]);
+            } else {
+                printf("%s", tokens[i]);
+            }
+
+            // Adiciona o separador, exceto após o último token
+            if(i < token_count - 1 && separators[i] != NULL) {
+                if(output(argc, argv) == 1) {
+                    fprintf(output_file, "%s", separators[i]);
+                } else {
+                    printf("%s", separators[i]);
+                }
+            }
+
+            free(tokens[i]);
+            if(separators[i] != NULL) {
+                free(separators[i]);
+            }
+        }
+
+        if(output(argc, argv) == 1) {
+            fprintf(output_file, "\n");
+        } else {
+            printf("\n");
+        }
     }
 }
 
